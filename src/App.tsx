@@ -4,12 +4,14 @@ import { parseMatrixWorkbook } from './data/excel'
 import { TabResumen } from './components/TabResumen'
 import { TabDetalle } from './components/TabDetalle'
 import { TabMatriz } from './components/TabMatriz'
+import { TabFiveS } from './components/TabFiveS'
 import { PdfExporter } from './components/PdfExporter'
 
 const TABS = [
   { id: 'resumen', label: '📊 Dashboard' },
   { id: 'detalle', label: '📈 Detalle por KPI' },
   { id: 'matriz', label: '📋 Matriz de Indicadores' },
+  { id: 'cinco', label: '🎯 Análisis 5S' },
 ]
 
 export default function App() {
@@ -97,7 +99,7 @@ export default function App() {
               📂 Cargar Excel
               <input type="file" accept=".xlsx,.xls" onChange={handleFile} hidden />
             </label>
-            <PdfExporter />
+            <PdfExporter prepare={() => setTab('resumen')} />
           </div>
         </div>
       </header>
@@ -113,6 +115,7 @@ export default function App() {
       {tab === 'resumen' && <TabResumen />}
       {tab === 'detalle' && <TabDetalle />}
       {tab === 'matriz' && <TabMatriz />}
+      {tab === 'cinco' && <TabFiveS />}
 
       <footer className="foot">
         <span>Palestra Couture · KPI · {dashboard.meta.date}</span>

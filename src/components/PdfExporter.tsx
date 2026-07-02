@@ -3,13 +3,27 @@ import { useI18n } from '../i18n'
 import { jsPDF } from 'jspdf'
 import html2canvas from 'html2canvas'
 
-export function PdfExporter() {
+interface Props {
+  /** Se ejecuta antes de capturar: sirve para forzar la pestaña Dashboard
+   *  (donde vive el Resumen Ejecutivo) de modo que siempre entre en el PDF. */
+  prepare?: () => void
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+const BG: [number, number, number] = [33, 40, 45] // var(--bg) #21282d
+
+export function PdfExporter({ prepare }: Props) {
   const { t } = useI18n()
   const [busy, setBusy] = useState(false)
 
   const handleExport = async () => {
     setBusy(true)
     try {
+      // 1. Asegurar que el Dashboard (con el Resumen Ejecutivo) esté montado y
+      //    que su animación de entrada haya terminado antes de capturar.
+      prepare?.()
+      await sleep(700)
+
       const el = document.querySelector('.shell') as HTMLElement
       if (!el) return
 
@@ -19,6 +33,7 @@ export function PdfExporter() {
         allowTaint: false,
         useCORS: true,
         logging: false,
+        windowWidth: el.scrollWidth,
       })
 
       const imgData = canvas.toDataURL('image/png')
@@ -26,17 +41,32 @@ export function PdfExporter() {
       const pdfW = pdf.internal.pageSize.getWidth()
       const pdfH = pdf.internal.pageSize.getHeight()
 
-      const ratio = canvas.width / canvas.height
-      let renderW = pdfW
-      let renderH = renderW / ratio
+      // Ancho = página completa; alto proporcional. Si supera una hoja, se
+      // reparte en varias desplazando la imagen hacia arriba (cada página
+      // recorta a su propio alto).
+      const imgH = (canvas.height * pdfW) / canvas.width
 
-      if (renderH > pdfH) {
-        renderH = pdfH
-        renderW = renderH * ratio
+      const paintBg = () => {
+        pdf.setFillColor(...BG)
+        pdf.rect(0, 0, pdfW, pdfH, 'F')
       }
 
-      pdf.addImage(imgData, 'PNG', (pdfW - renderW) / 2, (pdfH - renderH) / 2, renderW, renderH)
-      pdf.save('KPI-Palestra-Couture.pdf')
+      let heightLeft = imgH
+      let position = 0
+      paintBg()
+      pdf.addImage(imgData, 'PNG', 0, position, pdfW, imgH)
+      heightLeft -= pdfH
+
+      while (heightLeft > 0) {
+        position -= pdfH
+        pdf.addPage()
+        paintBg()
+        pdf.addImage(imgData, 'PNG', 0, position, pdfW, imgH)
+        heightLeft -= pdfH
+      }
+
+      const stamp = new Date().toISOString().slice(0, 10)
+      pdf.save(`KPI-Palestra-Couture-${stamp}.pdf`)
     } catch (err) {
       console.error('PDF error:', err)
     }

@@ -865,6 +865,119 @@ table.detail td.num {
   margin-right: auto;
 }
 
+/* ---- Análisis 5S (paneles BI, grid 2x2) ---- */
+.five-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 22px;
+  margin-bottom: 16px;
+}
+.five-banner-main {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+.five-banner-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.five-banner-value {
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.badge-5s {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border: 1px solid;
+  border-radius: 6px;
+  align-self: center;
+}
+.five-banner-stats {
+  display: flex;
+  gap: 28px;
+}
+.five-banner-stats > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.five-banner-stats .fs-num {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+.five-banner-stats .fs-lbl {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.five-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.panel {
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.panel-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+}
+.panel-hint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.chart-box {
+  width: 100%;
+  height: 300px;
+  margin-top: 6px;
+}
+@media (max-width: 900px) {
+  .five-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ---- Resumen ejecutivo (parte de situación priorizado) ---- */
 .exec {
   background: var(--surface-1);
