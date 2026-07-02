@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
 import {
   AUDIT_ITEMS as DEFAULT_ITEMS,
   AUDIT_META as DEFAULT_META,
@@ -6,11 +6,20 @@ import {
   type AuditMeta,
 } from './audit'
 
+export interface HistoryEntry {
+  id: string
+  items: AuditItem[]
+  meta: AuditMeta
+  timestamp: number
+}
+
 export interface AuditCtx {
   items: AuditItem[]
   meta: AuditMeta
+  history: HistoryEntry[]
   loadItems: (items: AuditItem[], meta: AuditMeta) => void
   reset: () => void
+  clearHistory: () => void
 }
 
 const Ctx = createContext<AuditCtx | null>(null)
@@ -18,18 +27,35 @@ const Ctx = createContext<AuditCtx | null>(null)
 export function AuditProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState(DEFAULT_ITEMS)
   const [meta, setMeta] = useState(DEFAULT_META)
+  const [history, setHistory] = useState<HistoryEntry[]>([])
 
-  const loadItems = (newItems: AuditItem[], newMeta: AuditMeta) => {
+  const loadItems = useCallback((newItems: AuditItem[], newMeta: AuditMeta) => {
     setItems(newItems)
     setMeta(newMeta)
-  }
+    setHistory((prev) => {
+      const entry: HistoryEntry = {
+        id: Date.now().toString(36),
+        items: newItems,
+        meta: newMeta,
+        timestamp: Date.now(),
+      }
+      const merged = [...prev, entry]
+      return merged.slice(-10)
+    })
+  }, [])
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setItems(DEFAULT_ITEMS)
     setMeta(DEFAULT_META)
-  }
+  }, [])
 
-  return <Ctx.Provider value={{ items, meta, loadItems, reset }}>{children}</Ctx.Provider>
+  const clearHistory = useCallback(() => setHistory([]), [])
+
+  return (
+    <Ctx.Provider value={{ items, meta, history, loadItems, reset, clearHistory }}>
+      {children}
+    </Ctx.Provider>
+  )
 }
 
 export function useAudit(): AuditCtx {

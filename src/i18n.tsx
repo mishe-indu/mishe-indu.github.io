@@ -65,6 +65,9 @@ const STRINGS: Dict = {
   'import.errors': { es: 'errores', en: 'errors' },
   'import.reset': { es: 'Restaurar datos originales', en: 'Reset to original data' },
   'export.pdf': { es: '📄 Exportar PDF', en: '📄 Export PDF' },
+  'compare.none': { es: 'Solo hay una auditoría cargada', en: 'Only one audit loaded' },
+  'compare.none_hint': { es: 'Importa más archivos Excel para comparar resultados entre auditorías.', en: 'Import more Excel files to compare results across audits.' },
+  'compare.table': { es: 'Comparativa por Área', en: 'Comparison by Area' },
 }
 
 interface I18nCtx {
