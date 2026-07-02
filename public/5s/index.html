@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Panel de Control — Auditoría 5S</title>
+<script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#060a12;color:#eaf0fa;min-height:100vh}
+.w{max-width:1000px;margin:0 auto;padding:20px 16px}
+h1{font-size:24px;font-weight:800;margin:4px 0;background:linear-gradient(90deg,#eaf0fa,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tag{font-size:10px;color:#f0b429;letter-spacing:4px;text-transform:uppercase;font-weight:700}
+.meta{font-size:12px;color:#445570}
+.tabs{display:flex;gap:3px;background:#0c1222;border:1px solid #182742;border-radius:10px;padding:3px;margin-bottom:16px}
+.tabs button{flex:1;padding:10px 4px;border:none;border-radius:8px;cursor:pointer;font-size:11px;font-weight:700;background:transparent;color:#445570;transition:all .2s}
+.tabs button.on{background:#f0b429;color:#060a12}
+.p{background:#0c1222;border:1px solid #182742;border-radius:14px;padding:18px;margin-bottom:14px}
+.pt{font-size:11px;font-weight:700;color:#8899b4;text-transform:uppercase;letter-spacing:1.5px;text-align:center;margin-bottom:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.st{background:#0c1222;border:1px solid #182742;border-radius:12px;padding:14px 12px;text-align:center}
+.st .v{font-size:26px;font-weight:800;font-family:'JetBrains Mono',monospace}
+.st .l{font-size:9px;color:#8899b4;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{padding:8px 6px;text-align:left;color:#445570;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #182742}
+td{padding:8px 6px;border-bottom:1px solid #18274215}
+.bd{font-size:9px;font-weight:800;padding:3px 8px;border-radius:4px}
+.uz{border:2px dashed #182742;border-radius:16px;padding:40px 20px;text-align:center;cursor:pointer;transition:all .3s}
+.uz:hover,.uz.dr{border-color:#f0b429;background:#f0b42912}
+.uz input{display:none}
+.uz-sm{border:2px dashed #182742;border-radius:10px;padding:10px 14px;text-align:center;cursor:pointer;transition:all .3s;flex:1}
+.uz-sm:hover,.uz-sm.dr{border-color:#f0b429;background:#f0b42912}
+.cs{border:1px solid #182742;border-radius:12px;overflow:hidden;margin-bottom:8px;background:#0c1222}
+.ch{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer}.ch:hover{background:#18274220}
+.cr{display:grid;grid-template-columns:1fr 50px;gap:8px;padding:9px 14px;align-items:center;border-left:3px solid #182742}
+.cr:nth-child(even){background:#18274210}
+.mb{width:60px;height:6px;border-radius:3px;background:#ef444440;overflow:hidden;display:inline-block;vertical-align:middle}
+.mf{height:100%;border-radius:3px;background:#0cce6b}
+.sl{display:flex;gap:5px;margin-bottom:14px;overflow-x:auto}
+.sl button{padding:7px 13px;border:1px solid #182742;border-radius:7px;cursor:pointer;font-size:10px;font-weight:600;white-space:nowrap;background:#0c1222;color:#8899b4}
+.sl button.on{background:#3b82f6;color:#fff;border-color:#3b82f6}
+.m{font-family:'JetBrains Mono',monospace}
+.foot{margin-top:24px;text-align:center;padding:12px 0;border-top:1px solid #182742;font-size:8px;color:#445570;letter-spacing:1.2px}
+.pdf-btn{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px}
+.pdf-btn:hover{opacity:.9}
+.back-btn{display:flex;align-items:center;gap:6px;padding:10px 16px;border:1px solid #182742;border-radius:8px;font-size:11px;color:#8899b4;text-decoration:none;font-weight:700;transition:all .2s}
+.back-btn:hover{border-color:#3b82f6;color:#eaf0fa}
+.toolbar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:stretch}
+.landing{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center}
+.landing .logo{font-size:64px;margin-bottom:16px}
+.landing p{font-size:13px;color:#445570;max-width:400px;line-height:1.6;margin-top:8px}
+.landing .uz{max-width:500px;width:100%;margin-top:24px}
+@media print{body{background:#fff!important;color:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .no-print{display:none!important}.print-only{display:block!important}.w{max-width:100%;padding:0 10px}
+  .p{border:1px solid #ddd!important;background:#fafafa!important;break-inside:avoid;margin-bottom:10px;padding:14px}
+  .pt{color:#333!important}h1{background:none;-webkit-text-fill-color:#111}
+  .st{border:1px solid #ddd!important;background:#f5f5f5!important}.st .v{color:#111!important}.st .l{color:#666!important}
+  table th{color:#333!important;border-bottom:2px solid #ccc!important}table td{border-bottom:1px solid #eee!important;color:#222!important}
+  .cs{border:1px solid #ddd!important;background:#fff!important}.ch{background:#f9f9f9!important}
+  .foot{border-top:1px solid #ddd!important;color:#999!important}@page{size:A4;margin:15mm 10mm}}
+.print-only{display:none}
+</style>
+</head>
+<body>
+<div class="w" id="app"></div>
+<div class="w print-only" id="pv"></div>
+<script>
+const AC=["#3b82f6","#a78bfa","#06b6d4","#f0b429","#ef4444","#f472b6","#0cce6b","#fb923c"];
+const AI={"CORTE Y PATRONAJE":"✂️","CONFECCIÓN":"🧵","BODEGA":"📦","GENERAL":"🏭",
+  "Corte y Patronaje":"✂️","Confección":"🧵","Bodega":"📦","General":"🏭",
+  "Clasificar":"🏷️","Ordenar":"📐","Limpieza":"🧹","Estandarizar":"📋","Disciplina":"⚙️"};
+let A=[],aI=0,T=0,oA=new Set();
+
+function gc(v){return v>=0.85?"#0cce6b":v>=0.70?"#eab308":"#ef4444"}
+function gl(v){return v>=0.85?"ÓPTIMO":v>=0.70?"ACEPTABLE":"CRÍTICO"}
+function ic(n){return AI[n]||AI[n.toUpperCase()]||"📋"}
+
+function parseFile(buf,fn){
+  const wb=XLSX.read(buf,{type:"array",cellDates:true});
+  let emp=fn.replace(/\.[^.]+$/,""),res="—",fec="—";
+  // good(): descarta booleanos (checkboxes) y celdas cortas al buscar metadatos
+  const good=c=>typeof c!=="boolean"&&(c instanceof Date||String(c).trim().length>2);
+  const fmtD=v=>v instanceof Date?v.toLocaleDateString("es",{day:"2-digit",month:"long",year:"numeric"}):String(v).trim();
+  {const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:""});
+    for(let ri=0;ri<rows.length;ri++){const row=rows[ri]||[];const nxt=rows[ri+1]||[];
+      const j=row.map(c=>String(c).toLowerCase()).join("|");
+      if(j.includes("5")&&j.includes("s")&&emp===fn.replace(/\.[^.]+$/,"")){
+        const p=row.find(c=>typeof c==="string"&&c.includes("-"));
+        if(p){const pts=String(p).split("-");const last=pts[pts.length-1].trim();if(pts.length>1&&last.length>2)emp=last;}}
+      if(j.includes("responsable")&&res==="—"){
+        const ci=row.findIndex(c=>/responsable/i.test(String(c)));
+        let v=row.find((c,i)=>i>ci&&good(c)&&!/responsable|fecha|audit/i.test(String(c)));
+        if(!v&&ci>=0)v=[nxt[ci],nxt[ci+1],nxt[ci-1]].find(c=>good(c)&&!(c instanceof Date));
+        if(v)res=String(v).trim();}
+      if(j.includes("empresa")&&!j.includes("5")){const v=row.find((c,i)=>i>0&&good(c)&&!/empresa/i.test(String(c)));if(v)emp=String(v).trim();}
+      if(j.includes("fecha")&&fec==="—"&&!/vigencia/.test(j)){
+        const ci=row.findIndex(c=>/fecha/i.test(String(c)));
+        let v=row.find((c,i)=>i>ci&&good(c)&&!/fecha|responsable/i.test(String(c)));
+        if(!v&&ci>=0)v=[nxt[ci],nxt[ci+1],nxt[ci-1]].find(c=>good(c));
+        if(v)fec=fmtD(v);}
+    }}
+  let items=[];
+  const tgt=wb.SheetNames.find(n=>/(audit|check|lista)/i.test(n)&&!/(resumen|puntaj)/i.test(n))||wb.SheetNames[0];
+  const rows=XLSX.utils.sheet_to_json(wb.Sheets[tgt],{header:1,defval:""});
+
+  // Detect format
+  let isCB=false,hR=-1,sC=-1;
+  for(let r=0;r<Math.min(rows.length,12);r++){for(let c=0;c<(rows[r]||[]).length;c++){
+    if(String(rows[r][c]).trim().toUpperCase()==="SI"){for(let r2=r+1;r2<Math.min(rows.length,r+8);r2++){
+      if(rows[r2]&&(rows[r2][c]===true||rows[r2][c]===false)){isCB=true;hR=r;sC=c;break;}}if(isCB)break;}}if(isCB)break;}
+
+  if(isCB){
+    let tC=-1,aC=-1,oC=-1;
+    for(let c=0;c<(rows[hR]||[]).length;c++){const h=String(rows[hR][c]).trim().toUpperCase();
+      if(h.includes("TEMA"))tC=c;if(h.includes("AREA")||h.includes("ÁREA"))aC=c;if(h.includes("OBSERV"))oC=c;}
+    if(tC<0){for(let c=0;c<(rows[hR+1]||[]).length;c++){if(String(rows[hR+1][c]).length>20){tC=c;break;}}}
+    if(tC<0)tC=4;if(aC<0)aC=1;
+    let ca="General";
+    for(let r=hR+1;r<rows.length;r++){const row=rows[r]||[];
+      const av=String(row[aC]||"").trim();if(av.length>2)ca=av;
+      const tema=String(row[tC]||"").trim().replace(/\n/g,"");if(tema.length<5)continue;
+      const si=row[sC]===true,no=row[sC+1]===true,na=row[sC+2]===true;
+      items.push({area:ca,item:tema,val:si?"SI":no?"NO":na?"N/A":"PENDIENTE",obs:oC>=0?String(row[oC]||"").trim():""});}
+  }else{
+    const cm={"clasif":"Clasificar","orden":"Ordenar","limpi":"Limpieza","estand":"Estandarizar","discip":"Disciplina"};
+    function mc(t){t=(t||"").toLowerCase();for(let k in cm)if(t.includes(k))return cm[k];return null;}
+    function pv(t){const v=(t||"").toString().toLowerCase().trim();if(["si","sí","yes","1","x"].includes(v))return"SI";if(["no","0"].includes(v))return"NO";if(["na","n/a","n.a","n.a.","no aplica","-"].includes(v))return"N/A";return null;}
+    let cc=null;
+    for(const row of rows){const cells=(row||[]).map(c=>String(c).trim());
+      for(const cell of cells){const m=mc(cell);if(m&&cell.length<25)cc=m;}
+      let fv=null,vi=-1;for(let i=0;i<cells.length;i++){const p=pv(cells[i]);if(p!==null){fv=p;vi=i;break;}}
+      if(fv&&cc){const bv=cells.filter((c,i)=>i<vi&&c.length>5&&!(mc(c)&&c.length<25));
+        const av=cells.filter((c,i)=>i>vi&&c.length>3);const it=bv.length?bv.reduce((a,b)=>a.length>=b.length?a:b,""):"";
+        if(it)items.push({area:cc,item:it,val:fv,obs:av.join(" ").trim()});}}
+  }
+  const order=[];items.forEach(i=>{if(!order.includes(i.area))order.push(i.area);});
+  const groups=order.map(name=>{const ai=items.filter(i=>i.area===name);const t=ai.length,si=ai.filter(i=>i.val==="SI").length,no=ai.filter(i=>i.val==="NO").length,na=ai.filter(i=>i.val==="N/A").length;
+    return{name,items:t,si,no,na,pct:(t-na)>0?Math.round(si/(t-na)*10000)/10000:0};});
+  const tI=groups.reduce((s,g)=>s+g.items,0),tS=groups.reduce((s,g)=>s+g.si,0),tNo=groups.reduce((s,g)=>s+g.no,0),tN=groups.reduce((s,g)=>s+g.na,0);
+  return{id:Date.now().toString(),empresa:emp,responsable:res,fecha:fec,fileName:fn,
+    indiceOK:(tI-tN)>0?Math.round(tS/(tI-tN)*100)/100:0,groups,checklist:items,totalItems:tI,totalSi:tS,totalNo:tNo,totalNa:tN};
+}
+
+function hUp(f){const r=new FileReader();r.onload=(e)=>{try{
+  const a=parseFile(new Uint8Array(e.target.result),f.name);
+  if(a.checklist.length===0){alert("No se detectaron ítems 5S en el archivo.\nVerifica que tenga columnas SI/NO/N/A con valores.");return;}
+  A.push(a);aI=A.length-1;T=0;a.groups.forEach(g=>oA.add(g.name));render();
+}catch(err){alert("Error al leer el archivo: "+err.message);}};r.readAsArrayBuffer(f);}
+
+function setupDrop(el){if(!el)return;
+  el.ondragover=e=>{e.preventDefault();el.classList.add("dr")};
+  el.ondragleave=()=>el.classList.remove("dr");
+  el.ondrop=e=>{e.preventDefault();el.classList.remove("dr");if(e.dataTransfer.files[0])hUp(e.dataTransfer.files[0]);};}
+
+/* ═══ PDF ═══ */
+async function exportPDF(){
+  const d=A[aI],tS=d.totalSi,tNo=d.totalNo,tN=d.totalNa,tI=d.totalItems,app=tI-tN;
+  const PB="#fff",PF={color:"#333",family:"Inter"};
+  const cd=document.createElement("div");cd.style.cssText="position:absolute;left:-9999px;width:700px";document.body.appendChild(cd);
+
+  const mk=()=>{const e=document.createElement("div");cd.appendChild(e);return e;};
+
+  const g1=mk();
+  await Plotly.newPlot(g1,[{type:"indicator",mode:"gauge+number",value:d.indiceOK*100,
+    number:{suffix:"%",font:{size:36,family:"JetBrains Mono",color:gc(d.indiceOK)}},
+    gauge:{axis:{range:[0,100]},bar:{color:gc(d.indiceOK),thickness:.6},bgcolor:"#eee",borderwidth:0,
+      steps:[{range:[0,70],color:"#fee2e2"},{range:[70,85],color:"#fef9c3"},{range:[85,100],color:"#d1fae5"}]}}],
+    {margin:{t:20,b:0,l:40,r:40},height:170,width:340,paper_bgcolor:PB,font:PF},{staticPlot:true});
+  const i1=await Plotly.toImage(g1,{format:"png",width:340,height:170});
+
+  const g2=mk();const n=d.groups.map(g=>g.name),v=d.groups.map(g=>+(g.pct*100).toFixed(0));
+  await Plotly.newPlot(g2,[
+    {type:"scatterpolar",r:[...v,v[0]],theta:[...n,n[0]],fill:"toself",fillcolor:"rgba(240,180,41,.2)",line:{color:"#f0b429",width:2},marker:{size:5},name:"Resultado"},
+    {type:"scatterpolar",r:Array(n.length+1).fill(100),theta:[...n,n[0]],fill:"toself",fillcolor:"rgba(0,0,0,.03)",line:{color:"#ccc",width:1,dash:"dash"},name:"Meta"}
+  ],{polar:{radialaxis:{visible:true,range:[0,100]},angularaxis:{tickfont:{size:10}}},margin:{t:30,b:30,l:70,r:70},height:340,width:480,paper_bgcolor:PB,font:PF,legend:{font:{size:10}}},{staticPlot:true});
+  const i2=await Plotly.toImage(g2,{format:"png",width:480,height:340});
+
+  const g3=mk();
+  await Plotly.newPlot(g3,[{type:"bar",x:n,y:v,marker:{color:d.groups.map((_,i)=>AC[i%AC.length])},
+    text:v.map(x=>x+"%"),textposition:"outside",textfont:{size:12,family:"JetBrains Mono"}}],
+    {margin:{t:30,b:80,l:40,r:20},height:280,width:640,paper_bgcolor:PB,plot_bgcolor:PB,font:PF,
+    yaxis:{range:[0,110],gridcolor:"#ddd",ticksuffix:"%"},xaxis:{tickfont:{size:10}}},{staticPlot:true});
+  const i3=await Plotly.toImage(g3,{format:"png",width:640,height:280});
+
+  const g4=mk();
+  await Plotly.newPlot(g4,[{type:"pie",labels:["Cumple","No Cumple","N/A"],values:[tS,tNo,tN],
+    marker:{colors:["#0cce6b","#ef4444","#94a3b8"]},hole:.4,textinfo:"value+percent",textfont:{size:11}}],
+    {margin:{t:20,b:30,l:20,r:20},height:240,width:380,paper_bgcolor:PB,font:PF,legend:{font:{size:10}}},{staticPlot:true});
+  const i4=await Plotly.toImage(g4,{format:"png",width:380,height:240});
+  document.body.removeChild(cd);
+
+  let ph=`<div style="text-align:center;margin-bottom:18px">
+    <div style="font-size:10px;color:#666;letter-spacing:3px;text-transform:uppercase;font-weight:700">Panel de Control — Auditoría 5S</div>
+    <h1 style="font-size:22px;font-weight:800;margin:4px 0;color:#111;background:none;-webkit-text-fill-color:#111">${d.empresa}</h1>
+    <div style="font-size:12px;color:#666">${d.fecha} · Auditor: ${d.responsable} · ${tI} ítems</div></div>`;
+
+  ph+=`<div style="display:flex;gap:14px;margin-bottom:16px;align-items:center;justify-content:center">
+    <img src="${i1}" style="width:240px">
+    <div style="text-align:center;padding:10px 18px;border:1px solid #ddd;border-radius:8px"><div style="font-size:26px;font-weight:800;font-family:monospace">${tI}</div><div style="font-size:9px;color:#666;text-transform:uppercase">Ítems</div></div>
+    <div style="text-align:center;padding:10px 18px;border:1px solid #ddd;border-radius:8px"><div style="font-size:26px;font-weight:800;font-family:monospace;color:#0cce6b">${tS}/${app}</div><div style="font-size:9px;color:#666;text-transform:uppercase">Cumplen</div></div></div>`;
+
+  ph+=`<div style="border:1px solid #ddd;border-radius:10px;padding:14px;margin-bottom:14px;break-inside:avoid">
+    <div style="font-size:11px;font-weight:700;color:#555;text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:1.5px">Resultados por Área</div>
+    <table><tr><th>#</th><th>Área</th><th>Ítems</th><th>SI</th><th>NO</th><th>N/A</th><th>%</th><th>Estado</th></tr>`;
+  d.groups.forEach((g,i)=>{const c=gc(g.pct);
+    ph+=`<tr><td style="font-family:monospace;font-weight:700;color:#999">${i+1}</td><td style="font-weight:600">${ic(g.name)} ${g.name}</td>
+      <td style="font-family:monospace">${g.items}</td><td style="font-family:monospace;color:#0cce6b;font-weight:700">${g.si}</td>
+      <td style="font-family:monospace;color:#ef4444;font-weight:700">${g.no}</td><td style="font-family:monospace;color:#999">${g.na}</td>
+      <td style="font-family:monospace;font-weight:800;color:${c}">${(g.pct*100).toFixed(0)}%</td>
+      <td><span style="font-size:9px;font-weight:800;color:${c};background:${c}18;padding:2px 6px;border-radius:3px">${gl(g.pct)}</span></td></tr>`;});
+  ph+=`<tr style="border-top:2px solid #ccc;background:#f5f5f5"><td colspan="2" style="font-weight:800">TOTAL</td>
+    <td style="font-family:monospace;font-weight:700">${tI}</td><td style="font-family:monospace;color:#0cce6b;font-weight:700">${tS}</td>
+    <td style="font-family:monospace;color:#ef4444;font-weight:700">${tNo}</td><td style="font-family:monospace;color:#999">${tN}</td>
+    <td style="font-family:monospace;font-weight:800;color:${gc(d.indiceOK)}">${(d.indiceOK*100).toFixed(0)}%</td>
+    <td><span style="font-size:9px;font-weight:800;color:${gc(d.indiceOK)};background:${gc(d.indiceOK)}18;padding:2px 6px;border-radius:3px">${gl(d.indiceOK)}</span></td></tr></table>
+  <div style="display:flex;gap:14px;justify-content:center;margin-top:8px;font-size:9px;color:#999">
+    <span>🟢 ≥85%</span><span>🟡 70-85%</span><span>🔴 &lt;70%</span></div></div>`;
+
+  ph+=`<div style="display:flex;gap:10px;margin-bottom:14px;break-inside:avoid">
+    <div style="flex:1;border:1px solid #ddd;border-radius:10px;padding:10px;text-align:center">
+      <div style="font-size:10px;font-weight:700;color:#555;text-transform:uppercase;margin-bottom:4px">Distribución</div><img src="${i4}" style="max-width:100%"></div>
+    <div style="flex:1;border:1px solid #ddd;border-radius:10px;padding:10px;text-align:center">
+      <div style="font-size:10px;font-weight:700;color:#555;text-transform:uppercase;margin-bottom:4px">Radar</div><img src="${i2}" style="max-width:100%"></div></div>`;
+
+  ph+=`<div style="border:1px solid #ddd;border-radius:10px;padding:10px;margin-bottom:14px;text-align:center;break-inside:avoid">
+    <div style="font-size:10px;font-weight:700;color:#555;text-transform:uppercase;margin-bottom:4px">Cumplimiento por Área</div><img src="${i3}" style="max-width:100%"></div>`;
+
+  ph+=`<div style="break-before:page;border:1px solid #ddd;border-radius:10px;padding:14px;margin-bottom:14px">
+    <div style="font-size:11px;font-weight:700;color:#555;text-align:center;margin-bottom:10px;text-transform:uppercase;letter-spacing:1.5px">Detalle del Checklist</div>`;
+  d.groups.forEach((g,gi)=>{const items=d.checklist.filter(i=>i.area===g.name);const col=AC[gi%AC.length];
+    ph+=`<div style="margin-bottom:8px;break-inside:avoid">
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:#f5f5f5;border-radius:6px;margin-bottom:3px">
+        <span>${ic(g.name)}</span><span style="font-weight:700;color:${col}">${g.name}</span>
+        <span style="margin-left:auto;font-size:10px;color:#999">${g.si} SI · ${g.no} NO</span>
+        <span style="font-family:monospace;font-weight:800;color:${gc(g.pct)}">${(g.pct*100).toFixed(0)}%</span></div>`;
+    items.forEach((it,i)=>{const vc=it.val==="SI"?"#0cce6b":it.val==="NO"?"#ef4444":"#999";
+      ph+=`<div style="display:flex;gap:8px;padding:4px 10px;border-left:3px solid ${col};font-size:11px;${i%2?"background:#fafafa":""}">
+        <div style="flex:1">${it.item}${it.obs?` <span style="color:#ef4444;font-size:10px;font-style:italic">— ${it.obs}</span>`:""}</div>
+        <span style="font-weight:800;color:${vc};white-space:nowrap">${it.val}</span></div>`;});
+    ph+=`</div>`;});
+  ph+=`</div><div style="text-align:center;font-size:8px;color:#999;padding:10px 0;border-top:1px solid #ddd">PANEL DE CONTROL 5S · ${d.empresa} · ${d.fecha}</div>`;
+
+  document.getElementById("app").classList.add("no-print");
+  const pv=document.getElementById("pv");pv.innerHTML=ph;pv.style.display="block";pv.classList.remove("print-only");
+  setTimeout(()=>{window.print();setTimeout(()=>{pv.style.display="none";pv.classList.add("print-only");document.getElementById("app").classList.remove("no-print");},500);},300);
+}
+
+/* ═══ RENDER ═══ */
+function render(){
+  const el=document.getElementById("app");
+
+  // Landing
+  if(A.length===0){
+    el.innerHTML=`<div class="landing">
+      <div class="logo">📊</div>
+      <div class="tag">Panel de Control</div>
+      <h1 style="font-size:28px">Auditoría 5S</h1>
+      <p>Sube tu archivo Excel de auditoría y el sistema calculará automáticamente los índices, generará las gráficas y te permitirá exportar el reporte en PDF.</p>
+      <div class="uz" id="uzL" onclick="document.getElementById('fiL').click()">
+        <input type="file" id="fiL" accept=".xlsx,.xls,.csv" onchange="if(this.files[0])hUp(this.files[0])" style="display:none">
+        <div style="font-size:40px;margin-bottom:8px">📂</div>
+        <div style="font-size:14px;font-weight:700;color:#f0b429;margin-bottom:4px">Arrastra tu Excel aquí o haz click para seleccionar</div>
+        <div style="font-size:11px;color:#445570">Formatos: .xlsx · .xls · .csv</div>
+        <div style="font-size:10px;color:#445570;margin-top:8px;padding-top:8px;border-top:1px solid #182742">Acepta formato con checkboxes (SI/NO/N/A) o texto</div>
+      </div>
+      <a href="../" class="back-btn" style="margin-top:20px">← Volver al panel de KPIs</a>
+    </div>`;
+    setupDrop(document.getElementById("uzL"));return;}
+
+  const d=A[aI],tI=d.totalItems,tS=d.totalSi,tNo=d.totalNo,tN=d.totalNa,app=tI-tN;
+  const tabs=["📊 Resumen","🕸️ Radar","📶 Barras","📝 Checklist","📈 Comparar"];
+
+  let h=`<div style="text-align:center;margin-bottom:18px">
+    <div class="tag">Panel de Control — Auditoría 5S</div>
+    <h1>${d.empresa}</h1>
+    <div class="meta">${d.fecha} · Auditor: ${d.responsable} · ${tI} ítems</div></div>
+    <div class="toolbar no-print">
+      <a href="../" class="back-btn">← Panel KPI</a>
+      <div class="uz-sm" id="uzD" onclick="document.getElementById('fiD').click()">
+        <input type="file" id="fiD" accept=".xlsx,.xls,.csv" onchange="if(this.files[0])hUp(this.files[0])" style="display:none">
+        <div style="font-size:11px;font-weight:700;color:#8899b4">📂 Cargar auditoría</div></div>
+      <button class="pdf-btn" onclick="exportPDF()">📄 Exportar PDF</button></div>`;
+
+  if(A.length>1){h+=`<div class="sl no-print">`;A.forEach((a,i)=>{
+    h+=`<button class="${i===aI?'on':''}" onclick="aI=${i};render()">${a.empresa} · ${a.fecha}${i>0?` <span onclick="event.stopPropagation();A.splice(${i},1);aI=Math.max(0,aI-1);render()" style="margin-left:6px;opacity:.4;cursor:pointer">×</span>`:''}</button>`;});h+=`</div>`;}
+
+  h+=`<div class="tabs no-print">`;tabs.forEach((t,i)=>{h+=`<button class="${i===T?'on':''}" onclick="T=${i};render()">${t}</button>`;});h+=`</div>`;
+
+  // ═══ RESUMEN ═══
+  if(T===0){
+    h+=`<div class="g2"><div class="p" style="grid-row:1/3;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:0">
+      <div style="font-size:9px;color:#445570;text-transform:uppercase;letter-spacing:2px;font-weight:700">Índice General</div>
+      <div id="gauge" style="width:100%;max-width:220px;height:150px;margin-top:6px"></div></div>
+      <div class="st" style="border-top:3px solid #3b82f6"><div class="v" style="color:#eaf0fa">${tI}</div><div class="l">Ítems Totales</div></div>
+      <div class="st" style="border-top:3px solid #0cce6b"><div class="v" style="color:#0cce6b">${tS}<span style="font-size:12px;color:#445570">/${app}</span></div><div class="l">Cumplen</div></div></div>`;
+    h+=`<div class="p"><div class="pt">Resultados por Área</div><table>
+      <tr><th>#</th><th>Área</th><th>Ítems</th><th>SI</th><th>NO</th><th>N/A</th><th>%</th><th>Estado</th></tr>`;
+    d.groups.forEach((g,i)=>{const c=gc(g.pct);
+      h+=`<tr><td class="m" style="font-weight:700;color:#445570">${i+1}</td><td style="font-weight:600">${ic(g.name)} ${g.name}</td>
+        <td class="m" style="color:#8899b4">${g.items}</td><td class="m" style="color:#0cce6b;font-weight:700">${g.si}</td>
+        <td class="m" style="color:#ef4444;font-weight:700">${g.no}</td><td class="m" style="color:#445570">${g.na}</td>
+        <td class="m" style="font-weight:800;color:${c}">${(g.pct*100).toFixed(0)}%</td>
+        <td><span class="bd" style="color:${c};background:${c}18">${gl(g.pct)}</span></td></tr>`;});
+    h+=`<tr style="border-top:2px solid #182742;background:#18274220"><td colspan="2" style="font-weight:800">TOTAL</td>
+      <td class="m" style="font-weight:700">${tI}</td><td class="m" style="color:#0cce6b;font-weight:700">${tS}</td>
+      <td class="m" style="color:#ef4444;font-weight:700">${tNo}</td><td class="m" style="color:#445570">${tN}</td>
+      <td class="m" style="font-weight:800;color:${gc(d.indiceOK)}">${(d.indiceOK*100).toFixed(0)}%</td>
+      <td><span class="bd" style="color:${gc(d.indiceOK)};background:${gc(d.indiceOK)}18">${gl(d.indiceOK)}</span></td></tr></table>
+    <div style="display:flex;gap:14px;justify-content:center;margin-top:10px;padding-top:10px;border-top:1px solid #182742">
+      <span style="font-size:9px;color:#445570">🟢 ≥85% Óptimo</span><span style="font-size:9px;color:#445570">🟡 70-85% Aceptable</span><span style="font-size:9px;color:#445570">🔴 &lt;70% Crítico</span></div></div>`;
+    h+=`<div class="p"><div class="pt">Distribución General</div><div id="pie" style="height:260px"></div></div>`;}
+
+  // ═══ RADAR ═══
+  if(T===1){h+=`<div class="p"><div class="pt">Diagrama Radar por Área</div><div id="radar" style="height:400px"></div>`;
+    const cr=d.groups.filter(g=>g.pct<0.70);
+    if(cr.length)h+=`<div style="margin-top:12px;padding:10px 14px;border-radius:8px;background:#ef44440c;border:1px solid #ef444422;font-size:11px"><div style="font-weight:700;color:#ef4444;margin-bottom:3px">⚠ Áreas Críticas (&lt;70%)</div><div style="color:#8899b4">${cr.map(g=>g.name+" ("+(g.pct*100).toFixed(0)+"%)").join(" · ")}</div></div>`;
+    h+=`</div>`;}
+
+  // ═══ BARRAS ═══
+  if(T===2){
+    h+=`<div class="p"><div class="pt">Cumplimiento por Área</div><div id="bH" style="height:${Math.max(250,d.groups.length*60)}px"></div></div>`;
+    h+=`<div class="p"><div class="pt">Porcentaje por Área</div><div id="bV" style="height:320px"></div></div>`;
+    h+=`<div class="p"><div class="pt">Desglose SI / NO / N/A</div><div id="bS" style="height:320px"></div></div>`;}
+
+  // ═══ CHECKLIST ═══
+  if(T===3){h+=`<div class="g3">`;
+    [{l:"SI",v:tS,c:"#0cce6b"},{l:"NO",v:tNo,c:"#ef4444"},{l:"N/A",v:tN,c:"#445570"}].forEach(s=>{
+      h+=`<div class="st" style="border-top:3px solid ${s.c}"><div class="v m" style="font-size:18px;color:${s.c}">${s.v}</div><div class="l">${s.l}</div></div>`;});h+=`</div>`;
+    d.groups.forEach((g,gi)=>{const items=d.checklist.filter(i=>i.area===g.name);const isO=oA.has(g.name);const col=AC[gi%AC.length];const ap=g.items-g.na||1;
+      h+=`<div class="cs"><div class="ch" onclick="oA.has('${g.name}')?oA.delete('${g.name}'):oA.add('${g.name}');render()">
+        <span style="font-size:16px">${ic(g.name)}</span><div style="flex:1"><div style="font-size:13px;font-weight:700;color:${col}">${g.name}</div>
+        <div style="font-size:9px;color:#445570">${g.items} ítems · ${g.si} SI · ${g.no} NO</div></div>
+        <span class="m" style="font-size:16px;font-weight:800;color:${gc(g.pct)}">${(g.pct*100).toFixed(0)}%</span>
+        <div class="mb"><div class="mf" style="width:${(g.si/ap*100).toFixed(0)}%"></div></div>
+        <span style="font-size:14px;color:#445570;transform:rotate(${isO?180:0}deg);transition:transform .2s;display:inline-block">▾</span></div>`;
+      if(isO){items.forEach(it=>{const vc=it.val==="SI"?"#0cce6b":it.val==="NO"?"#ef4444":it.val==="PENDIENTE"?"#f0b429":"#445570";
+        h+=`<div class="cr" style="border-color:${col}"><div><div style="font-size:11px;line-height:1.4">${it.item}</div>
+          ${it.obs?`<div style="font-size:10px;color:#ef4444;margin-top:3px;font-style:italic">📌 ${it.obs}</div>`:""}</div>
+          <div style="text-align:right"><span class="bd" style="color:${vc};background:${vc}15">${it.val}</span></div></div>`;});}
+      h+=`</div>`;});}
+
+  // ═══ COMPARAR ═══
+  if(T===4){if(A.length<2){h+=`<div class="p" style="text-align:center;padding:40px">
+      <div style="font-size:32px;margin-bottom:8px">📂</div>
+      <div style="font-size:13px;font-weight:700;color:#8899b4">Sube más auditorías para comparar</div>
+      <div style="font-size:11px;color:#445570;margin-top:4px">Carga múltiples Excel para ver la evolución.</div></div>`;}
+    else{h+=`<div class="p"><div class="pt">Índices Generales</div><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">`;
+      A.forEach(a=>{h+=`<div style="text-align:center;padding:14px 20px;background:#101b30;border-radius:10px;border:1px solid #182742">
+        <div class="m" style="font-size:26px;font-weight:800;color:${gc(a.indiceOK)}">${(a.indiceOK*100).toFixed(0)}%</div>
+        <div style="font-size:11px;color:#8899b4;font-weight:600">${a.empresa}</div><div style="font-size:9px;color:#445570">${a.fecha}</div></div>`;});
+      h+=`</div></div><div class="p"><div class="pt">Evolución</div><div id="lnC" style="height:280px"></div></div>`;
+      h+=`<div class="p"><div class="pt">Tabla Comparativa</div><table><tr><th>#</th><th>Área</th>`;
+      A.forEach((_,i)=>{h+=`<th style="text-align:center">Aud.${i+1}</th>`;});h+=`</tr>`;
+      const allA=[];A.forEach(a=>a.groups.forEach(g=>{if(!allA.includes(g.name))allA.push(g.name);}));
+      allA.forEach((area,ai)=>{h+=`<tr><td class="m" style="color:#445570;font-weight:700">${ai+1}</td><td style="font-weight:600">${ic(area)} ${area}</td>`;
+        A.forEach(a=>{const g=a.groups.find(g=>g.name===area);const v=g?g.pct:0;
+          h+=`<td class="m" style="text-align:center;font-weight:700;color:${gc(v)}">${(v*100).toFixed(0)}%</td>`;});h+=`</tr>`;});
+      h+=`<tr style="border-top:2px solid #182742;background:#18274220"><td colspan="2" style="font-weight:800">TOTAL</td>`;
+      A.forEach(a=>{h+=`<td class="m" style="text-align:center;font-weight:800;color:${gc(a.indiceOK)}">${(a.indiceOK*100).toFixed(0)}%</td>`;});
+      h+=`</tr></table></div>`;}}
+
+  h+=`<div class="foot">PANEL DE CONTROL 5S · ${d.empresa} · ${d.fecha}</div>`;
+  el.innerHTML=h;
+  setupDrop(document.getElementById("uzD"));
+
+  // ── PLOTLY ──
+  const PB="rgba(0,0,0,0)",PF={color:"#8899b4",family:"Inter"},PG="#182742";
+  if(T===0){
+    Plotly.newPlot("gauge",[{type:"indicator",mode:"gauge+number",value:d.indiceOK*100,
+      number:{suffix:"%",font:{size:38,family:"JetBrains Mono",color:gc(d.indiceOK)}},
+      gauge:{axis:{range:[0,100],tickcolor:"#445570",tickfont:{color:"#445570",size:9}},bar:{color:gc(d.indiceOK),thickness:.6},bgcolor:"#182742",borderwidth:0,
+        steps:[{range:[0,70],color:"#ef444418"},{range:[70,85],color:"#eab30818"},{range:[85,100],color:"#0cce6b18"}]}}],
+      {margin:{t:20,b:0,l:30,r:30},height:150,paper_bgcolor:PB,plot_bgcolor:PB,font:PF},{responsive:true,displayModeBar:false});
+    Plotly.newPlot("pie",[{type:"pie",labels:["Cumple","No Cumple","N/A"],values:[tS,tNo,tN],
+      marker:{colors:["#0cce6b","#ef4444","#445570"]},hole:.45,textinfo:"value+percent",textfont:{color:"#fff",size:12}}],
+      {margin:{t:20,b:40,l:20,r:20},paper_bgcolor:PB,plot_bgcolor:PB,font:PF,legend:{font:{color:"#8899b4",size:11}}},{responsive:true,displayModeBar:false});}
+  if(T===1){const n=d.groups.map(g=>g.name),v=d.groups.map(g=>+(g.pct*100).toFixed(0));
+    Plotly.newPlot("radar",[
+      {type:"scatterpolar",r:[...v,v[0]],theta:[...n,n[0]],fill:"toself",fillcolor:"#f0b42922",line:{color:"#f0b429",width:2},marker:{size:6,color:"#f0b429"},name:"Resultado"},
+      {type:"scatterpolar",r:Array(n.length+1).fill(100),theta:[...n,n[0]],fill:"toself",fillcolor:"#25385e10",line:{color:"#253a5e",width:1,dash:"dash"},name:"Meta (100%)"}
+    ],{polar:{bgcolor:PB,radialaxis:{visible:true,range:[0,100],gridcolor:PG,tickfont:{color:"#445570",size:9}},angularaxis:{tickfont:{color:"#8899b4",size:11}}},
+      margin:{t:40,b:40,l:80,r:80},paper_bgcolor:PB,font:PF,legend:{font:{color:"#8899b4"}}},{responsive:true,displayModeBar:false});}
+  if(T===2){const n=d.groups.map(g=>g.name);
+    Plotly.newPlot("bH",[
+      {type:"bar",y:n,x:d.groups.map(g=>+(g.pct*100).toFixed(0)),name:"Cumple",orientation:"h",marker:{color:"#0cce6b"}},
+      {type:"bar",y:n,x:d.groups.map(g=>+((1-g.pct)*100).toFixed(0)),name:"No Cumple",orientation:"h",marker:{color:"#ef4444"}}
+    ],{barmode:"stack",margin:{t:10,b:40,l:160,r:20},paper_bgcolor:PB,plot_bgcolor:PB,font:PF,
+      xaxis:{gridcolor:PG,ticksuffix:"%",tickfont:{color:"#445570"}},yaxis:{tickfont:{color:"#8899b4"}},legend:{font:{color:"#8899b4"}}},{responsive:true,displayModeBar:false});
+    Plotly.newPlot("bV",[{type:"bar",x:n,y:d.groups.map(g=>+(g.pct*100).toFixed(0)),
+      marker:{color:d.groups.map((_,i)=>AC[i%AC.length])},text:d.groups.map(g=>(g.pct*100).toFixed(0)+"%"),textposition:"outside",textfont:{color:"#eaf0fa",size:13,family:"JetBrains Mono"}}],
+      {margin:{t:30,b:80,l:40,r:20},paper_bgcolor:PB,plot_bgcolor:PB,font:PF,yaxis:{range:[0,110],gridcolor:PG,ticksuffix:"%",tickfont:{color:"#445570"}},xaxis:{tickfont:{color:"#8899b4",size:10}}},{responsive:true,displayModeBar:false});
+    Plotly.newPlot("bS",[
+      {type:"bar",x:n,y:d.groups.map(g=>g.si),name:"SI",marker:{color:"#0cce6b"}},
+      {type:"bar",x:n,y:d.groups.map(g=>g.no),name:"NO",marker:{color:"#ef4444"}},
+      {type:"bar",x:n,y:d.groups.map(g=>g.na),name:"N/A",marker:{color:"#445570"}}
+    ],{barmode:"stack",margin:{t:10,b:80,l:40,r:20},paper_bgcolor:PB,plot_bgcolor:PB,font:PF,
+      yaxis:{gridcolor:PG,tickfont:{color:"#445570"}},xaxis:{tickfont:{color:"#8899b4",size:10}},legend:{font:{color:"#8899b4"}}},{responsive:true,displayModeBar:false});}
+  if(T===4&&A.length>1){
+    Plotly.newPlot("lnC",[{type:"scatter",mode:"lines+markers",x:A.map(a=>a.empresa+" ("+a.fecha+")"),y:A.map(a=>+(a.indiceOK*100).toFixed(0)),
+      line:{color:"#f0b429",width:3},marker:{size:10,color:"#f0b429",line:{color:"#060a12",width:2}}}],
+      {margin:{t:20,b:60,l:40,r:20},paper_bgcolor:PB,plot_bgcolor:PB,font:PF,yaxis:{range:[0,100],gridcolor:PG,ticksuffix:"%",tickfont:{color:"#445570"}},xaxis:{tickfont:{color:"#8899b4"}}},{responsive:true,displayModeBar:false});}
+}
+
+// Bootstrap: si el panel de KPIs nos redirigió con un archivo pendiente
+// (sessionStorage), lo cargamos automáticamente y mostramos los resultados.
+(function(){
+  try{
+    const raw=sessionStorage.getItem("palestra5s.pendingFile");
+    if(raw){
+      sessionStorage.removeItem("palestra5s.pendingFile");
+      const {name,b64}=JSON.parse(raw);
+      const bin=atob(b64);
+      const u8=new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
+      const a=parseFile(u8,name);
+      if(a.checklist.length){A.push(a);aI=A.length-1;a.groups.forEach(g=>oA.add(g.name));}
+    }
+  }catch(e){console.error("bootstrap 5s:",e);}
+  render();
+})();
+</script>
+</body>
+</html>

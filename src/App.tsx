@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useAudit } from './data/AuditContext'
-import { parseMatrixWorkbook } from './data/excel'
+import { parseMatrixWorkbook, looksLikeAudit } from './data/excel'
 import { TabResumen } from './components/TabResumen'
 import { TabDetalle } from './components/TabDetalle'
 import { TabMatriz } from './components/TabMatriz'
@@ -23,6 +23,17 @@ const IconRadar = () => (
 const IconUpload = () => (
   <svg viewBox="0 0 16 16" width="15" height="15" {...ico}><path d="M8 10.5V2.5M5 5l3-3 3 3" /><path d="M2.5 10.5v2a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-2" /></svg>
 )
+
+/** ArrayBuffer -> base64 en bloques (evita desbordar la pila con archivos grandes). */
+function bufToB64(buf: ArrayBuffer): string {
+  const u8 = new Uint8Array(buf)
+  let s = ''
+  const CHUNK = 0x8000
+  for (let i = 0; i < u8.length; i += CHUNK) {
+    s += String.fromCharCode(...u8.subarray(i, i + CHUNK))
+  }
+  return btoa(s)
+}
 
 const TABS = [
   { id: 'resumen', label: 'Dashboard', icon: <IconGrid /> },
@@ -48,6 +59,15 @@ export default function App() {
       const result = parseMatrixWorkbook(buf, file.name)
       if (result.dashboard && result.dashboard.definitions.length > 0) {
         loadDashboard(result.dashboard)
+      } else if (looksLikeAudit(buf)) {
+        // Es una auditoría 5S (checklist SI/NO/N/A): la entregamos al panel
+        // /5s/ vía sessionStorage y redirigimos con los resultados.
+        sessionStorage.setItem(
+          'palestra5s.pendingFile',
+          JSON.stringify({ name: file.name, b64: bufToB64(buf) }),
+        )
+        window.location.href = './5s/'
+        return
       } else {
         setError(result.errors.join('. ') || 'No se detectaron KPIs')
       }
@@ -66,7 +86,9 @@ export default function App() {
           <div className="tag" style={{ textAlign: 'center' }}>Panel de Control</div>
           <h1 style={{ textAlign: 'center', fontSize: 28 }}>KPI Palestra Couture</h1>
           <p className="landing-desc">
-            Sube tu archivo MATRIZ DE INDICADORES PALESTRA.xlsx para visualizar los indicadores clave de gestión.
+            Sube tu archivo MATRIZ DE INDICADORES PALESTRA.xlsx para visualizar los indicadores
+            clave de gestión. Si subes una auditoría 5S (checklist SI/NO/N/A), se abrirá
+            automáticamente el panel de Auditoría 5S con sus resultados.
           </p>
           <div
             className="landing-drop"
@@ -89,7 +111,9 @@ export default function App() {
             <div className="landing-drop-title">
               {loading ? 'Procesando…' : 'Arrastra tu Excel aquí o haz click'}
             </div>
-            <div className="landing-drop-sub">Formato: MATRIZ DE INDICADORES PALESTRA.xlsx</div>
+            <div className="landing-drop-sub">
+              Formatos: MATRIZ DE INDICADORES (KPIs) · Auditoría 5S (SI/NO/N/A)
+            </div>
           </div>
           {error && <div className="landing-error">{error}</div>}
         </div>

@@ -22,6 +22,31 @@ function norm(s: string): string {
   return s.trim().toLowerCase().replace(/\s+/g, ' ')
 }
 
+/**
+ * Detecta si un libro es una AUDITORÍA 5S (checklist SI/NO/N/A) en vez de la
+ * matriz de KPIs. Se usa para redirigir al panel /5s/ cuando alguien sube un
+ * archivo tipo "Formato auditoria 5'Ss MMH" o "5S PALESTRA COUTURE".
+ */
+export function looksLikeAudit(buf: ArrayBuffer): boolean {
+  try {
+    const wb = XLSX.read(buf, { type: 'array' })
+    if (wb.SheetNames.some((n) => /audit|check\s*list|checklist/i.test(n))) return true
+    // Fallback: alguna hoja con encabezado SI | NO | N/A en las primeras filas
+    for (const sn of wb.SheetNames.slice(0, 4)) {
+      const rows: any[][] = XLSX.utils.sheet_to_json(wb.Sheets[sn], { header: 1, defval: '' })
+      for (const row of rows.slice(0, 15)) {
+        const cells = (row || []).map((c) => String(c).trim().toUpperCase())
+        if (cells.includes('SI') && cells.includes('NO') && (cells.includes('N/A') || cells.includes('NA'))) {
+          return true
+        }
+      }
+    }
+  } catch {
+    // archivo ilegible: no es auditoría
+  }
+  return false
+}
+
 function cleanNum(v: any): number | null {
   if (v === null || v === undefined || v === '') return null
   if (typeof v === 'number' && !isNaN(v)) return v
