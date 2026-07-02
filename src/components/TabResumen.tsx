@@ -3,6 +3,7 @@ import { useI18n } from '../i18n'
 import { useAudit } from '../data/AuditContext'
 import { statusColor, statusLabel } from '../data/kpi'
 import { ExecutiveSummary } from './ExecutiveSummary'
+import { GaugeRing } from './GaugeRing'
 
 export function TabResumen() {
   const { lang } = useI18n()
@@ -30,25 +31,34 @@ export function TabResumen() {
         {cards.map(({ def, latest, months, trend }) => {
           const status = latest?.status ?? 'sin_datos'
           const color = statusColor(status)
-          const val = latest?.result
+          const valPct = latest?.result != null ? latest.result * 100 : null
           return (
             <div key={def.id} className="kpi-card" style={{ borderTopColor: color }}>
               <div className="kpi-perspective">{def.perspective}</div>
               <div className="kpi-name">{def.name}</div>
-              <div className="kpi-value" style={{ color }}>
-                {val !== null ? def.unit === '%' ? `${Math.round(val * 100)}%` : `${val}${def.unit}` : '—'}
-              </div>
-              <div className="kpi-meta-line">
-                <span className="kpi-badge" style={{ background: `${color}20`, color }}>
-                  {statusLabel(status, lang)}
-                </span>
-                {trend !== null && (
-                  <span className="kpi-trend" style={{ color: trend >= 0 ? 'var(--good)' : 'var(--critical)' }}>
-                    {trend >= 0 ? '↑' : '↓'} {Math.abs(Math.round(trend * 100))}%
+              <div className="kpi-card-body">
+                <GaugeRing
+                  value={valPct}
+                  target={def.invert ? null : Math.round(def.idealThreshold * 100)}
+                  color={color}
+                  size={104}
+                  stroke={9}
+                />
+                <div className="kpi-card-side">
+                  <span className="kpi-badge" style={{ background: `${color}20`, color }}>
+                    {statusLabel(status, lang)}
                   </span>
-                )}
+                  {trend !== null && (
+                    <span className="kpi-trend" style={{ color: trend >= 0 ? 'var(--good)' : 'var(--critical)' }}>
+                      {trend >= 0 ? '↑' : '↓'} {Math.abs(Math.round(trend * 100))}%
+                    </span>
+                  )}
+                  <span className="kpi-target mono">
+                    meta {def.invert ? '≤' : '≥'} {Math.round(def.idealThreshold * 100)}%
+                  </span>
+                  {latest?.period && <span className="kpi-period">{latest.period}</span>}
+                </div>
               </div>
-              {latest?.period && <div className="kpi-period">{latest.period}</div>}
               <div className="kpi-bars">
                 {months.filter((m) => m.result !== null).slice(-6).map((m, i) => {
                   const h = def.unit === '%' ? (m.result ?? 0) * 100 : Math.min(100, (m.result ?? 0) / (def.idealThreshold || 1) * 100)
