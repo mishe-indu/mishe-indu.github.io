@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useI18n } from '../i18n'
 import { useAudit } from '../data/AuditContext'
 import { statusColor, statusLabel } from '../data/kpi'
+import { ExecutiveSummary } from './ExecutiveSummary'
 
 export function TabResumen() {
   const { lang } = useI18n()
@@ -24,6 +25,7 @@ export function TabResumen() {
 
   return (
     <div>
+      <ExecutiveSummary />
       <div className="kpi-grid">
         {cards.map(({ def, latest, months, trend }) => {
           const status = latest?.status ?? 'sin_datos'
