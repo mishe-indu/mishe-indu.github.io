@@ -8,6 +8,8 @@ import { PillarAreaHeatmap } from './components/PillarAreaHeatmap'
 import { ParetoChart } from './components/ParetoChart'
 import { Filters } from './components/Filters'
 import { DetailTable } from './components/DetailTable'
+import { ExcelImporter } from './components/ExcelImporter'
+import { PdfExporter } from './components/PdfExporter'
 import { emptyFilters } from './data/compute'
 
 export default function App() {
@@ -15,7 +17,7 @@ export default function App() {
   const [filters, setFilters] = useState(emptyFilters())
 
   return (
-    <div className="shell">
+    <div className="shell" id="shell">
       <Header />
       <KpiRow />
 
@@ -42,6 +44,11 @@ export default function App() {
         <span>Palestra Couture · 5S · {t('app.title')}</span>
         <span>{t('footer.note')}</span>
       </footer>
+
+      <div className="toolbar">
+        <ExcelImporter />
+        <PdfExporter />
+      </div>
     </div>
   )
 }

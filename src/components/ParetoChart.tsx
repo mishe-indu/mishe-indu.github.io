@@ -10,12 +10,14 @@ import {
   LabelList,
 } from 'recharts'
 import { useI18n } from '../i18n'
+import { useAudit } from '../data/AuditContext'
 import { paretoByArea } from '../data/compute'
 import { STATUS, CYAN, GRID, AXIS, TEXT_SECONDARY, TEXT_PRIMARY, TEXT_MUTED } from '../theme'
 
 export function ParetoChart() {
   const { t, lang } = useI18n()
-  const rows = paretoByArea()
+  const { items } = useAudit()
+  const rows = paretoByArea(items)
   const data = rows.map((r) => ({
     name: lang === 'es' ? r.es : r.en,
     count: r.count,

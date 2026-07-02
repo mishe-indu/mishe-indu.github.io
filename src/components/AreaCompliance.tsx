@@ -10,12 +10,14 @@ import {
   Tooltip,
 } from 'recharts'
 import { useI18n } from '../i18n'
+import { useAudit } from '../data/AuditContext'
 import { byArea, type Band } from '../data/compute'
 import { STATUS, STATUS_ICON, GRID, AXIS, TEXT_SECONDARY, TEXT_PRIMARY } from '../theme'
 
 export function AreaCompliance() {
   const { t, lang } = useI18n()
-  const rows = byArea()
+  const { items } = useAudit()
+  const rows = byArea(items)
     .filter((r) => r.tally.total > 0)
     .sort((a, b) => (b.tally.index ?? 0) - (a.tally.index ?? 0))
   const data = rows.map((r) => ({

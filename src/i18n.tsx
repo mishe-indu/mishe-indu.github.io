@@ -59,6 +59,12 @@ const STRINGS: Dict = {
     en: 'Audit data from 2026-05-07. Edit src/data/audit.ts to update.',
   },
   'legend.axis': { es: 'Eje: índice OK 0–100%', en: 'Axis: OK index 0–100%' },
+
+  'import.button': { es: '📂 Importar Excel', en: '📂 Import Excel' },
+  'import.loaded': { es: 'ítems cargados', en: 'items loaded' },
+  'import.errors': { es: 'errores', en: 'errors' },
+  'import.reset': { es: 'Restaurar datos originales', en: 'Reset to original data' },
+  'export.pdf': { es: '📄 Exportar PDF', en: '📄 Export PDF' },
 }
 
 interface I18nCtx {

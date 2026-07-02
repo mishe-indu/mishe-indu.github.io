@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useI18n } from '../i18n'
+import { useAudit } from '../data/AuditContext'
 import { summary, pct } from '../data/compute'
 import { AREAS } from '../data/audit'
 import { STATUS, AMBER, CYAN } from '../theme'
@@ -63,7 +64,8 @@ function Kpi({
 
 export function KpiRow() {
   const { t } = useI18n()
-  const s = summary()
+  const { items } = useAudit()
+  const s = summary(items)
   const gIndex = s.global.index ?? 0
   const gColor = STATUS[s.global.band]
   const animated = useCountUp(gIndex * 100)

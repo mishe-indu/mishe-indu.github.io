@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useI18n } from '../i18n'
-import { AUDIT_ITEMS, AREAS, PILLARS, type Response } from '../data/audit'
+import { useAudit } from '../data/AuditContext'
+import { AREAS, PILLARS, type Response } from '../data/audit'
 import { applyFilters, type Filters as F } from '../data/compute'
 import { AREA_COLOR, STATUS, STATUS_ICON } from '../theme'
 
@@ -12,7 +13,8 @@ const RESP_BAND: Record<Response, 'good' | 'critical' | 'warning'> = {
 
 export function DetailTable({ filters }: { filters: F }) {
   const { t, lang } = useI18n()
-  const rows = useMemo(() => applyFilters(AUDIT_ITEMS, filters), [filters])
+  const { items } = useAudit()
+  const rows = useMemo(() => applyFilters(items, filters), [items, filters])
 
   const areaLabel = (id: string) => {
     const a = AREAS.find((x) => x.id === id)!
@@ -71,7 +73,7 @@ export function DetailTable({ filters }: { filters: F }) {
       </table>
       <div className="table-foot">
         {t('table.showing')} <span style={{ color: STATUS.good }}>{rows.length}</span>{' '}
-        {t('table.of')} {AUDIT_ITEMS.length}
+        {t('table.of')} {items.length}
       </div>
     </div>
   )

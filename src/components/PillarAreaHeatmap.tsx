@@ -1,11 +1,13 @@
 import { useI18n } from '../i18n'
+import { useAudit } from '../data/AuditContext'
 import { matrix } from '../data/compute'
 import { AREAS, PILLARS } from '../data/audit'
 import { seqColor } from '../theme'
 
 export function PillarAreaHeatmap() {
   const { t, lang } = useI18n()
-  const cells = matrix()
+  const { items } = useAudit()
+  const cells = matrix(items)
   const get = (pillar: string, area: string) =>
     cells.find((c) => c.pillar === pillar && c.area === area)!
 

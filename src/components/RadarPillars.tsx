@@ -8,13 +8,15 @@ import {
   Tooltip,
 } from 'recharts'
 import { useI18n } from '../i18n'
+import { useAudit } from '../data/AuditContext'
 import { byPillar } from '../data/compute'
 import { AMBER, GRID, TEXT_SECONDARY, TEXT_MUTED, STATUS } from '../theme'
 import { band } from '../data/compute'
 
 export function RadarPillars() {
   const { t, lang } = useI18n()
-  const rows = byPillar()
+  const { items } = useAudit()
+  const rows = byPillar(items)
   const data = rows.map((r) => ({
     key: r.key,
     label: lang === 'es' ? r.es : r.en,
