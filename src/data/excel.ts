@@ -67,13 +67,19 @@ export function parseMatrixWorkbook(buf: ArrayBuffer, _filename: string): {
 
   const matrixRows: any[][] = XLSX.utils.sheet_to_json(wb.Sheets[matrixSheet], { header: 1, defval: '' })
 
-  // Find header row with PERSPECTIVA, OBJETIVO, INDICADOR
+  // Localizar la fila Y COLUMNA de PERSPECTIVA. Las demás columnas se leen
+  // relativas a ella (persp, obj, indicador, fórmula, unidad, frecuencia,
+  // ideal, aceptable, deficiente, responsable) para tolerar hojas cuyo rango
+  // usado no empieza en la columna A o donde insertaron/borraron columnas
+  // a la izquierda.
   let headerRow = -1
+  let baseCol = -1
   for (let r = 0; r < matrixRows.length; r++) {
     const row = matrixRows[r] || []
     for (let c = 0; c < row.length; c++) {
       if (norm(String(row[c])) === 'perspectiva') {
         headerRow = r
+        baseCol = c
         break
       }
     }
@@ -90,19 +96,22 @@ export function parseMatrixWorkbook(buf: ArrayBuffer, _filename: string): {
 
   for (let r = headerRow + 2; r < matrixRows.length; r++) {
     const row = matrixRows[r] || []
-    const perspective = String(row[2] || '').trim()
-    const objective = String(row[3] || '').trim()
-    const name = String(row[4] || '').trim()
-    const formula = String(row[5] || '').trim()
-    const unit = String(row[6] || '').trim()
-    const frequency = String(row[7] || '').trim()
-    const idealDesc = String(row[8] || '').trim()
-    const acceptableDesc = String(row[9] || '').trim()
-    const deficientDesc = String(row[10] || '').trim()
-    const responsible = String(row[11] || '').trim()
+    const col = (offset: number) => String(row[baseCol + offset] || '').trim()
+    const perspective = col(0)
+    const objective = col(1)
+    const name = col(2)
+    const formula = col(3)
+    const unit = col(4)
+    const frequency = col(5)
+    const idealDesc = col(6)
+    const acceptableDesc = col(7)
+    const deficientDesc = col(8)
+    const responsible = col(9)
 
     if (!name) continue
-    if (name.toLowerCase().includes('puntaje total') || name.toLowerCase().includes('indice')) continue
+    // Saltar filas-resumen del formato de auditoría, no KPIs reales.
+    const lower = name.toLowerCase()
+    if (lower.includes('puntaje total') || lower.startsWith('índice ok') || lower.startsWith('indice ok')) continue
 
     idx++
     const invert = norm(name).includes('accident') || norm(name).includes('tasa')
