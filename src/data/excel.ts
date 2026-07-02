@@ -6,12 +6,16 @@ import {
   evalStatus,
 } from './kpi'
 
-const SHEET_NAMES: Record<string, string> = {
-  'kpi publicaciones': 'publicaciones',
-  "kpi 5's": '5s',
-  'kpi ventas': 'ventas',
-  'kpi conformidad': 'conformidad',
-  'kpi accidentes': 'accidentes',
+// La hoja de datos de cada KPI se encuentra por su PERSPECTIVA (columna de la
+// matriz), buscando un fragmento en el nombre de la hoja. Ej: perspectiva
+// "Publicidad" -> hoja "KPI PUBLICACIONES".
+const PERSPECTIVE_TO_SHEET: Record<string, string> = {
+  publicidad: 'publicaciones',
+  visual: "5's",
+  ventas: 'ventas',
+  'gestión de calidad': 'conformidad',
+  'gestion de calidad': 'conformidad',
+  seguridad: 'accidentes',
 }
 
 function norm(s: string): string {
@@ -26,9 +30,23 @@ function cleanNum(v: any): number | null {
   return isNaN(n) ? null : n
 }
 
+// Todo se normaliza a FRACCIÓN (0–1). El Excel mezcla escalas: la mayoría de
+// hojas guardan el resultado como fracción (0.5) pero accidentes como
+// porcentaje (100). Si el valor supera 1.5 asumimos que viene en % y lo
+// dividimos entre 100.
+function toFraction(v: number | null): number | null {
+  if (v === null) return null
+  return Math.abs(v) > 1.5 ? v / 100 : v
+}
+
+// Extrae el primer número del texto de la meta ("Entre 70% y 89%..." -> 70) y
+// lo pasa a fracción. parseFloat directo fallaba cuando el texto empieza con
+// palabra ("Entre", "Menor", "igual").
 function parseThreshold(text: string): number {
-  const n = parseFloat(text.replace(',', '.'))
-  return isNaN(n) ? 0 : n
+  const m = String(text).match(/(\d+(?:[.,]\d+)?)/)
+  if (!m) return 0
+  const n = parseFloat(m[1].replace(',', '.'))
+  return isNaN(n) ? 0 : n / 100
 }
 
 export function parseMatrixWorkbook(buf: ArrayBuffer, _filename: string): {
@@ -117,11 +135,10 @@ export function parseMatrixWorkbook(buf: ArrayBuffer, _filename: string): {
   const kpiData: Record<number, KpiMonthData[]> = {}
 
   for (const def of defs) {
-    const sheetId = SHEET_NAMES[norm(def.perspective)] || norm(def.name).replace(/\s/g, '_')
-    const sheetName = wb.SheetNames.find((n) => {
-      const nn = norm(n)
-      return nn.includes(sheetId) || nn.includes(norm(def.name).slice(0, 10))
-    })
+    const frag = PERSPECTIVE_TO_SHEET[norm(def.perspective)]
+    const sheetName = frag
+      ? wb.SheetNames.find((n) => norm(n).includes(frag))
+      : undefined
 
     if (!sheetName) {
       kpiData[def.id] = []
@@ -171,8 +188,8 @@ export function parseMatrixWorkbook(buf: ArrayBuffer, _filename: string): {
       if (!period || period === '.' || period.length > 12) continue
       if (norm(period) === 'total' || norm(period) === 'promedio') continue
 
-      const result = resultCol >= 0 ? cleanNum(row[resultCol]) : null
-      const meta = metaCol >= 0 ? cleanNum(row[metaCol]) : null
+      const result = toFraction(resultCol >= 0 ? cleanNum(row[resultCol]) : null)
+      const meta = toFraction(metaCol >= 0 ? cleanNum(row[metaCol]) : null)
 
       months.push({
         period,
