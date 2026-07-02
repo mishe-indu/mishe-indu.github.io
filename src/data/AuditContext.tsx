@@ -17,6 +17,7 @@ export interface AuditCtx {
   items: AuditItem[]
   meta: AuditMeta
   history: HistoryEntry[]
+  imported: boolean
   loadItems: (items: AuditItem[], meta: AuditMeta) => void
   reset: () => void
   clearHistory: () => void
@@ -28,10 +29,12 @@ export function AuditProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState(DEFAULT_ITEMS)
   const [meta, setMeta] = useState(DEFAULT_META)
   const [history, setHistory] = useState<HistoryEntry[]>([])
+  const [imported, setImported] = useState(false)
 
   const loadItems = useCallback((newItems: AuditItem[], newMeta: AuditMeta) => {
     setItems(newItems)
     setMeta(newMeta)
+    setImported(true)
     setHistory((prev) => {
       const entry: HistoryEntry = {
         id: Date.now().toString(36),
@@ -47,12 +50,13 @@ export function AuditProvider({ children }: { children: ReactNode }) {
   const reset = useCallback(() => {
     setItems(DEFAULT_ITEMS)
     setMeta(DEFAULT_META)
+    setImported(false)
   }, [])
 
   const clearHistory = useCallback(() => setHistory([]), [])
 
   return (
-    <Ctx.Provider value={{ items, meta, history, loadItems, reset, clearHistory }}>
+    <Ctx.Provider value={{ items, meta, history, imported, loadItems, reset, clearHistory }}>
       {children}
     </Ctx.Provider>
   )

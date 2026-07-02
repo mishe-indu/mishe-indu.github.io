@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useI18n } from './i18n'
 import { useAudit } from './data/AuditContext'
+import { parseExcelWorkbook } from './data/excel'
 import { Header } from './components/Header'
 import { KpiRow } from './components/KpiRow'
 import { RadarPillars } from './components/RadarPillars'
@@ -9,7 +10,6 @@ import { PillarAreaHeatmap } from './components/PillarAreaHeatmap'
 import { ParetoChart } from './components/ParetoChart'
 import { Filters } from './components/Filters'
 import { DetailTable } from './components/DetailTable'
-import { ExcelImporter } from './components/ExcelImporter'
 import { PdfExporter } from './components/PdfExporter'
 import { TabComparar } from './components/TabComparar'
 import { emptyFilters } from './data/compute'
@@ -24,16 +24,95 @@ const TABS = [
 
 export default function App() {
   const { t } = useI18n()
-  const { meta } = useAudit()
+  const { meta, imported, loadItems } = useAudit()
   const [tab, setTab] = useState('resumen')
   const [filters, setFilters] = useState(emptyFilters())
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setLoading(true)
+    setError('')
+    try {
+      const buf = await file.arrayBuffer()
+      const result = parseExcelWorkbook(buf, file.name)
+      if (result.items.length > 0) {
+        loadItems(result.items, result.meta)
+      } else {
+        setError(result.errors.join('. ') || 'No se detectaron ítems 5S')
+      }
+    } catch (err) {
+      setError((err as Error).message)
+    }
+    setLoading(false)
+    if (inputRef.current) inputRef.current.value = ''
+  }
+
+  if (!imported) {
+    return (
+      <div className="shell" id="shell">
+        <div className="landing">
+          <div className="landing-icon">📊</div>
+          <div className="tag" style={{ textAlign: 'center' }}>Panel de Control</div>
+          <h1 style={{ textAlign: 'center', fontSize: 28 }}>Auditoría 5S</h1>
+          <p className="landing-desc">
+            Sube tu archivo Excel de auditoría y el sistema calculará automáticamente los índices, generará las gráficas y te permitirá exportar el reporte en PDF.
+          </p>
+          <div
+            className="landing-drop"
+            onClick={() => inputRef.current?.click()}
+            onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('dragover') }}
+            onDragLeave={(e) => e.currentTarget.classList.remove('dragover')}
+            onDrop={(e) => {
+              e.preventDefault()
+              e.currentTarget.classList.remove('dragover')
+              if (e.dataTransfer.files[0]) {
+                const dt = new DataTransfer()
+                dt.items.add(e.dataTransfer.files[0])
+                if (inputRef.current) inputRef.current.files = dt.files
+                handleFile({ target: inputRef.current } as any)
+              }
+            }}
+          >
+            <input
+              ref={inputRef}
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleFile}
+              hidden
+            />
+            <div className="landing-drop-icon">📂</div>
+            <div className="landing-drop-title">
+              {loading ? 'Procesando…' : 'Arrastra tu Excel aquí o haz click para seleccionar'}
+            </div>
+            <div className="landing-drop-sub">Formatos: .xlsx · .xls</div>
+            <div className="landing-drop-hint">
+              Acepta formato checkboxes (SI/NO/N/A) o texto (si/no/na)
+            </div>
+          </div>
+          {error && <div className="landing-error">{error}</div>}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="shell" id="shell">
       <Header />
 
       <div className="toolbar">
-        <ExcelImporter />
+        <label className="action-btn">
+          📂 Importar Excel
+          <input
+            type="file"
+            accept=".xlsx,.xls"
+            onChange={handleFile}
+            hidden
+          />
+        </label>
         <PdfExporter />
       </div>
 
