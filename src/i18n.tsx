@@ -1,6 +1,3 @@
-// ============================================================================
-//  Internacionalización mínima ES / EN (sin dependencias).
-// ============================================================================
 import { createContext, useContext, useState, type ReactNode } from 'react'
 
 export type Lang = 'es' | 'en'
@@ -8,66 +5,9 @@ export type Lang = 'es' | 'en'
 type Dict = Record<string, { es: string; en: string }>
 
 const STRINGS: Dict = {
-  'app.title': { es: 'Panel de Control 5S', en: '5S Control Panel' },
-  'app.subtitle': { es: 'Auditoría de metodología · Palestra Couture', en: 'Methodology audit · Palestra Couture' },
-  'meta.responsible': { es: 'Responsable', en: 'Auditor' },
-  'meta.date': { es: 'Fecha de auditoría', en: 'Audit date' },
-  'meta.location': { es: 'Ubicación', en: 'Location' },
-  'meta.standard': { es: 'Estándar de aprobación', en: 'Approval standard' },
-
-  'kpi.global': { es: 'Cumplimiento general', en: 'Overall compliance' },
-  'kpi.areas': { es: 'Áreas evaluadas', en: 'Areas audited' },
-  'kpi.approved': { es: 'Áreas aprobadas', en: 'Areas passed' },
-  'kpi.nc': { es: 'No conformidades', en: 'Non-conformities' },
-  'kpi.approved.hint': { es: 'en banda verde (≥85%)', en: 'in green band (≥85%)' },
-  'kpi.items': { es: 'ítems evaluados', en: 'items audited' },
-
-  'chart.radar': { es: 'Rendimiento por pilar 5S', en: '5S pillar performance' },
-  'chart.area': { es: 'Cumplimiento por área', en: 'Compliance by area' },
-  'chart.matrix': { es: 'Matriz pilar × área', en: 'Pillar × area matrix' },
-  'chart.pareto': { es: 'Pareto de no conformidades', en: 'Non-conformity Pareto' },
-  'chart.pareto.bars': { es: 'No conformidades', en: 'Non-conformities' },
-  'chart.pareto.line': { es: '% acumulado', en: 'Cumulative %' },
-  'chart.radar.series': { es: 'Índice OK', en: 'OK index' },
-
-  'table.title': { es: 'Detalle de la auditoría', en: 'Audit detail' },
-  'table.id': { es: '#', en: '#' },
-  'table.area': { es: 'Área', en: 'Area' },
-  'table.pillar': { es: 'Pilar', en: 'Pillar' },
-  'table.question': { es: 'Ítem evaluado', en: 'Audited item' },
-  'table.response': { es: 'Resultado', en: 'Result' },
-  'table.showing': { es: 'Mostrando', en: 'Showing' },
-  'table.of': { es: 'de', en: 'of' },
-
-  'filters.title': { es: 'Filtros', en: 'Filters' },
-  'filters.area': { es: 'Área', en: 'Area' },
-  'filters.pillar': { es: 'Pilar', en: 'Pillar' },
-  'filters.response': { es: 'Resultado', en: 'Result' },
-  'filters.clear': { es: 'Limpiar', en: 'Clear' },
-  'filters.active': { es: 'filtros activos', en: 'active filters' },
-
-  'resp.si': { es: 'Sí', en: 'Yes' },
-  'resp.no': { es: 'No', en: 'No' },
-  'resp.na': { es: 'N/A', en: 'N/A' },
-
-  'band.good': { es: 'Conforme', en: 'Compliant' },
-  'band.warning': { es: 'Observado', en: 'Watch' },
-  'band.critical': { es: 'Crítico', en: 'Critical' },
-
-  'footer.note': {
-    es: 'Datos de la auditoría del 07/05/2026. Editá src/data/audit.ts para actualizar.',
-    en: 'Audit data from 2026-05-07. Edit src/data/audit.ts to update.',
-  },
-  'legend.axis': { es: 'Eje: índice OK 0–100%', en: 'Axis: OK index 0–100%' },
-
-  'import.button': { es: '📂 Importar Excel', en: '📂 Import Excel' },
-  'import.loaded': { es: 'ítems cargados', en: 'items loaded' },
-  'import.errors': { es: 'errores', en: 'errors' },
-  'import.reset': { es: 'Restaurar datos originales', en: 'Reset to original data' },
+  'app.title': { es: 'KPI Dashboard', en: 'KPI Dashboard' },
+  'import.button': { es: '📂 Cargar Excel', en: '📂 Load Excel' },
   'export.pdf': { es: '📄 Exportar PDF', en: '📄 Export PDF' },
-  'compare.none': { es: 'Solo hay una auditoría cargada', en: 'Only one audit loaded' },
-  'compare.none_hint': { es: 'Importa más archivos Excel para comparar resultados entre auditorías.', en: 'Import more Excel files to compare results across audits.' },
-  'compare.table': { es: 'Comparativa por Área', en: 'Comparison by Area' },
 }
 
 interface I18nCtx {

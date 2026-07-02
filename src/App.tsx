@@ -1,32 +1,20 @@
 import { useState, useRef } from 'react'
-import { useI18n } from './i18n'
 import { useAudit } from './data/AuditContext'
-import { parseExcelWorkbook } from './data/excel'
-import { Header } from './components/Header'
-import { KpiRow } from './components/KpiRow'
-import { RadarPillars } from './components/RadarPillars'
-import { AreaCompliance } from './components/AreaCompliance'
-import { PillarAreaHeatmap } from './components/PillarAreaHeatmap'
-import { ParetoChart } from './components/ParetoChart'
-import { Filters } from './components/Filters'
-import { DetailTable } from './components/DetailTable'
+import { parseMatrixWorkbook } from './data/excel'
+import { TabResumen } from './components/TabResumen'
+import { TabDetalle } from './components/TabDetalle'
+import { TabMatriz } from './components/TabMatriz'
 import { PdfExporter } from './components/PdfExporter'
-import { TabComparar } from './components/TabComparar'
-import { emptyFilters } from './data/compute'
 
 const TABS = [
-  { id: 'resumen', label: '📊 Resumen' },
-  { id: 'radar', label: '🕸️ Radar' },
-  { id: 'barras', label: '📶 Barras' },
-  { id: 'checklist', label: '📝 Checklist' },
-  { id: 'comparar', label: '📈 Comparar' },
+  { id: 'resumen', label: '📊 Dashboard' },
+  { id: 'detalle', label: '📈 Detalle por KPI' },
+  { id: 'matriz', label: '📋 Matriz de Indicadores' },
 ]
 
 export default function App() {
-  const { t } = useI18n()
-  const { meta, imported, loadItems } = useAudit()
+  const { dashboard, imported, loadDashboard } = useAudit()
   const [tab, setTab] = useState('resumen')
-  const [filters, setFilters] = useState(emptyFilters())
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
@@ -38,11 +26,11 @@ export default function App() {
     setError('')
     try {
       const buf = await file.arrayBuffer()
-      const result = parseExcelWorkbook(buf, file.name)
-      if (result.items.length > 0) {
-        loadItems(result.items, result.meta)
+      const result = parseMatrixWorkbook(buf, file.name)
+      if (result.dashboard && result.dashboard.definitions.length > 0) {
+        loadDashboard(result.dashboard)
       } else {
-        setError(result.errors.join('. ') || 'No se detectaron ítems 5S')
+        setError(result.errors.join('. ') || 'No se detectaron KPIs')
       }
     } catch (err) {
       setError((err as Error).message)
@@ -57,9 +45,9 @@ export default function App() {
         <div className="landing">
           <div className="landing-icon">📊</div>
           <div className="tag" style={{ textAlign: 'center' }}>Panel de Control</div>
-          <h1 style={{ textAlign: 'center', fontSize: 28 }}>Auditoría 5S</h1>
+          <h1 style={{ textAlign: 'center', fontSize: 28 }}>KPI Palestra Couture</h1>
           <p className="landing-desc">
-            Sube tu archivo Excel de auditoría y el sistema calculará automáticamente los índices, generará las gráficas y te permitirá exportar el reporte en PDF.
+            Sube tu archivo MATRIZ DE INDICADORES PALESTRA.xlsx para visualizar los indicadores clave de gestión.
           </p>
           <div
             className="landing-drop"
@@ -77,21 +65,12 @@ export default function App() {
               }
             }}
           >
-            <input
-              ref={inputRef}
-              type="file"
-              accept=".xlsx,.xls"
-              onChange={handleFile}
-              hidden
-            />
+            <input ref={inputRef} type="file" accept=".xlsx,.xls" onChange={handleFile} hidden />
             <div className="landing-drop-icon">📂</div>
             <div className="landing-drop-title">
-              {loading ? 'Procesando…' : 'Arrastra tu Excel aquí o haz click para seleccionar'}
+              {loading ? 'Procesando…' : 'Arrastra tu Excel aquí o haz click'}
             </div>
-            <div className="landing-drop-sub">Formatos: .xlsx · .xls</div>
-            <div className="landing-drop-hint">
-              Acepta formato checkboxes (SI/NO/N/A) o texto (si/no/na)
-            </div>
+            <div className="landing-drop-sub">Formato: MATRIZ DE INDICADORES PALESTRA.xlsx</div>
           </div>
           {error && <div className="landing-error">{error}</div>}
         </div>
@@ -99,22 +78,29 @@ export default function App() {
     )
   }
 
+  if (!dashboard) return null
+
   return (
     <div className="shell" id="shell">
-      <Header />
-
-      <div className="toolbar">
-        <label className="action-btn">
-          📂 Importar Excel
-          <input
-            type="file"
-            accept=".xlsx,.xls"
-            onChange={handleFile}
-            hidden
-          />
-        </label>
-        <PdfExporter />
-      </div>
+      <header>
+        <div className="topbar">
+          <div className="brand">
+            <img src="./logo.jpeg" alt="Palestra Couture" className="brand-logo" />
+            <div>
+              <div className="eyebrow">Palestra Couture</div>
+              <h1>KPI Dashboard</h1>
+              <p>Indicadores clave de gestión</p>
+            </div>
+          </div>
+          <div className="toolbar">
+            <label className="action-btn">
+              📂 Cargar Excel
+              <input type="file" accept=".xlsx,.xls" onChange={handleFile} hidden />
+            </label>
+            <PdfExporter />
+          </div>
+        </div>
+      </header>
 
       <div className="tabs">
         {TABS.map((t) => (
@@ -124,52 +110,13 @@ export default function App() {
         ))}
       </div>
 
-      {tab === 'resumen' && (
-        <>
-          <KpiRow />
-          <div className="grid grid-2-1">
-            <RadarPillars />
-            <AreaCompliance />
-          </div>
-          <div className="grid grid-2 section-gap">
-            <PillarAreaHeatmap />
-            <ParetoChart />
-          </div>
-        </>
-      )}
-
-      {tab === 'radar' && (
-        <div className="grid grid-2 section-gap">
-          <RadarPillars />
-          <PillarAreaHeatmap />
-        </div>
-      )}
-
-      {tab === 'barras' && (
-        <>
-          <KpiRow />
-          <div className="grid grid-2 section-gap">
-            <AreaCompliance />
-            <ParetoChart />
-          </div>
-        </>
-      )}
-
-      {tab === 'checklist' && (
-        <>
-          <h2 className="eyebrow" style={{ margin: '0 0 12px', fontSize: 12, letterSpacing: '0.16em' }}>
-            {t('table.title')}
-          </h2>
-          <Filters filters={filters} setFilters={setFilters} />
-          <DetailTable filters={filters} />
-        </>
-      )}
-
-      {tab === 'comparar' && <TabComparar />}
+      {tab === 'resumen' && <TabResumen />}
+      {tab === 'detalle' && <TabDetalle />}
+      {tab === 'matriz' && <TabMatriz />}
 
       <footer className="foot">
-        <span>{meta.company} · 5S · {t('app.title')}</span>
-        <span>{t('footer.note')}</span>
+        <span>Palestra Couture · KPI · {dashboard.meta.date}</span>
+        <span>MATRIZ DE INDICADORES CLAVES DE GESTIÓN</span>
       </footer>
     </div>
   )

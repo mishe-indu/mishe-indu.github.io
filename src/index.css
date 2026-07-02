@@ -1,31 +1,32 @@
 /* ==========================================================================
-   Palestra Couture · Panel 5S — sistema de diseño industrial (grafito)
+   Palestra Couture · KPI Dashboard — sistema de diseño corporativo
    ========================================================================== */
 :root {
   /* Superficies */
-  --bg: #0e0f12;
-  --surface-1: #16181d;
-  --surface-2: #1c1f26;
-  --surface-3: #23262f;
-  --line: rgba(233, 233, 226, 0.08);
-  --line-strong: rgba(233, 233, 226, 0.16);
+  --bg: #21282d;
+  --surface-1: #2d3748;
+  --surface-2: #364152;
+  --surface-3: #3d4a5c;
+  --line: rgba(247, 250, 252, 0.08);
+  --line-strong: rgba(247, 250, 252, 0.16);
 
   /* Tinta */
-  --text-primary: #ecece6;
-  --text-secondary: #a7a89f;
-  --text-muted: #71736c;
+  --text-primary: #f7fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
 
   /* Marca / señal */
-  --amber: #f2a41c;
+  --mint: #98d1b0;
+  --amber: var(--mint);
   --cyan: #35c6e6;
 
   /* Estados */
-  --good: #0ca30c;
-  --warning: #fab219;
-  --critical: #d03b3b;
-  --good-dim: rgba(12, 163, 12, 0.14);
-  --warning-dim: rgba(250, 178, 25, 0.14);
-  --critical-dim: rgba(208, 59, 59, 0.14);
+  --good: #98d1b0;
+  --warning: #f0b429;
+  --critical: #e53e3e;
+  --good-dim: rgba(152, 209, 176, 0.14);
+  --warning-dim: rgba(240, 180, 41, 0.14);
+  --critical-dim: rgba(229, 62, 62, 0.14);
 
   /* Tipografía */
   --font-display: 'Archivo', system-ui, sans-serif;
@@ -119,6 +120,14 @@ body {
   align-items: center;
   gap: 16px;
 }
+.brand-logo {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--line-strong);
+}
 .brand-mark {
   width: 46px;
   height: 46px;
@@ -128,7 +137,7 @@ body {
   place-items: center;
   background: linear-gradient(150deg, var(--surface-3), var(--surface-1));
   border: 1px solid var(--line-strong);
-  color: var(--amber);
+  color: var(--mint);
   font-family: var(--font-display);
   font-weight: 800;
   font-size: 20px;
@@ -232,7 +241,7 @@ body {
   top: 0;
   bottom: 0;
   width: 3px;
-  background: var(--accent, var(--amber));
+  background: var(--accent, var(--mint));
 }
 .kpi .kpi-label {
   font-family: var(--font-mono);
@@ -708,7 +717,7 @@ table.detail td.num {
 .landing-drop-title {
   font-size: 14px;
   font-weight: 700;
-  color: var(--amber);
+  color: var(--mint);
   margin-bottom: 4px;
 }
 .landing-drop-sub {
@@ -856,12 +865,219 @@ table.detail td.num {
   margin-right: auto;
 }
 
+/* ---- KPI grid ---- */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.kpi-card {
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--mint);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.kpi-perspective {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.kpi-name {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.kpi-value {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.kpi-meta-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+.kpi-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.kpi-trend {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+.kpi-period {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.kpi-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 60px;
+  margin-top: 6px;
+}
+.kpi-bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  height: 100%;
+}
+.kpi-bar-track {
+  flex: 1;
+  width: 100%;
+  max-width: 20px;
+  background: var(--surface-3);
+  border-radius: 3px;
+  position: relative;
+  display: flex;
+  flex-direction: column-reverse;
+  overflow: hidden;
+}
+.kpi-bar-fill {
+  width: 100%;
+  border-radius: 3px;
+  min-height: 2px;
+  transition: height 0.5s ease;
+}
+.kpi-bar-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.kpi-responsible {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
+}
+
+/* ---- KPI selector (detalle) ---- */
+.kpi-selector {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.kpi-sel-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+.kpi-sel-btn:hover {
+  border-color: var(--line-strong);
+  color: var(--text-primary);
+}
+.kpi-sel-btn.active {
+  background: var(--mint);
+  color: #21282d;
+  border-color: var(--mint);
+}
+
+/* ---- Detalle KPI ---- */
+.detalle-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+}
+.detalle-meta strong {
+  color: var(--text-primary);
+}
+.detalle-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.detalle-table th {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.detalle-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.badge-sm {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* ---- Matriz table ---- */
+.matriz-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  min-width: 800px;
+}
+.matriz-table th {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-align: left;
+  padding: 8px 8px;
+  border-bottom: 2px solid var(--line-strong);
+  white-space: nowrap;
+}
+.matriz-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.matriz-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.015);
+}
+
 /* ---- Toolbar (import / export) ---- */
 .toolbar {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 20px;
   flex-wrap: wrap;
 }
 .action-btn {
@@ -884,55 +1100,10 @@ table.detail td.num {
 }
 .action-btn:hover {
   background: var(--surface-3);
-  border-color: var(--amber);
+  border-color: var(--mint);
 }
 .action-btn:active {
   transform: scale(0.97);
-}
-.action-btn.secondary {
-  color: var(--text-secondary);
-  border-color: var(--line);
-}
-.action-btn.secondary:hover {
-  color: var(--critical);
-  border-color: var(--critical);
-}
-.import-export-group {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.import-toast {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  padding: 6px 12px;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
-  font-size: 11px;
-}
-.import-ok {
-  color: var(--good);
-}
-.import-errors {
-  color: var(--critical);
-  cursor: pointer;
-}
-.import-errors ul {
-  margin: 4px 0 0 16px;
-  padding: 0;
-  font-size: 10.5px;
-  color: var(--text-secondary);
-  max-height: 120px;
-  overflow-y: auto;
-}
-.import-errors summary {
-  list-style: none;
-  cursor: pointer;
 }
 
 @media (prefers-reduced-motion: reduce) {
