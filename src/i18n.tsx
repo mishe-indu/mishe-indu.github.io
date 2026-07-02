@@ -7,7 +7,7 @@ type Dict = Record<string, { es: string; en: string }>
 const STRINGS: Dict = {
   'app.title': { es: 'KPI Dashboard', en: 'KPI Dashboard' },
   'import.button': { es: '📂 Cargar Excel', en: '📂 Load Excel' },
-  'export.pdf': { es: '📄 Exportar PDF', en: '📄 Export PDF' },
+  'export.pdf': { es: 'Exportar PDF', en: 'Export PDF' },
 }
 
 interface I18nCtx {

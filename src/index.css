@@ -108,25 +108,60 @@ body {
 /* ---- Header ---- */
 .topbar {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 24px;
   flex-wrap: wrap;
-  padding-bottom: 22px;
+  padding-bottom: 18px;
   border-bottom: 1px solid var(--line);
 }
 .brand {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 15px;
 }
 .brand-logo {
-  width: 46px;
-  height: 46px;
+  width: 50px;
+  height: 50px;
   flex: none;
-  border-radius: 10px;
+  border-radius: 13px;
   object-fit: cover;
   border: 1px solid var(--line-strong);
+  box-shadow: 0 0 0 4px rgba(152, 209, 176, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.brand-name {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  line-height: 1;
+}
+.brand-meta {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.brand-meta .brand-dot {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+.report-chip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--mint);
+  background: rgba(152, 209, 176, 0.1);
+  border: 1px solid rgba(152, 209, 176, 0.22);
+  border-radius: 999px;
+  padding: 2px 10px;
 }
 .brand-mark {
   width: 46px;
@@ -637,42 +672,53 @@ table.detail td.num {
   }
 }
 
-/* ---- Tabs ---- */
+/* ---- Tabs (navegación con subrayado, estilo BI) ---- */
 .tabs {
   display: flex;
-  gap: 3px;
-  background: var(--surface-1);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 3px;
-  margin: 16px 0 20px;
+  gap: 2px;
+  border-bottom: 1px solid var(--line);
+  margin: 18px 0 22px;
   overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 .tab {
-  flex: 1;
-  padding: 10px 12px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 15px;
   border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 700;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
   background: transparent;
-  color: var(--text-muted);
-  transition: all 0.18s ease;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #9aa4b2;
   white-space: nowrap;
-  letter-spacing: 0.03em;
+  transition: color 0.16s ease, border-color 0.16s ease;
+}
+.tab svg {
+  opacity: 0.75;
+  transition: opacity 0.16s ease, color 0.16s ease;
 }
 .tab:hover {
-  color: var(--text-secondary);
-  background: var(--surface-2);
+  color: var(--text-primary);
+}
+.tab:hover svg {
+  opacity: 1;
 }
 .tab.active {
-  background: var(--amber);
-  color: #060a12;
+  color: var(--text-primary);
+  border-bottom-color: var(--mint);
 }
-.tab.active:hover {
-  background: var(--amber);
+.tab.active svg {
+  color: var(--mint);
+  opacity: 1;
 }
 
 /* ---- Landing (import first) ---- */
@@ -1473,12 +1519,31 @@ table.detail td.num {
   white-space: nowrap;
   user-select: none;
 }
+.action-btn svg {
+  color: var(--text-secondary);
+}
 .action-btn:hover {
   background: var(--surface-3);
-  border-color: var(--mint);
+  border-color: var(--line-strong);
 }
 .action-btn:active {
   transform: scale(0.97);
+}
+.action-btn.primary {
+  color: var(--mint);
+  background: rgba(152, 209, 176, 0.1);
+  border-color: rgba(152, 209, 176, 0.3);
+}
+.action-btn.primary svg {
+  color: var(--mint);
+}
+.action-btn.primary:hover {
+  background: rgba(152, 209, 176, 0.16);
+  border-color: var(--mint);
+}
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -7,11 +7,28 @@ import { TabMatriz } from './components/TabMatriz'
 import { TabFiveS } from './components/TabFiveS'
 import { PdfExporter } from './components/PdfExporter'
 
+const ico = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
+const IconGrid = () => (
+  <svg viewBox="0 0 16 16" width="15" height="15" {...ico}><rect x="1.75" y="1.75" width="5.5" height="5.5" rx="1" /><rect x="8.75" y="1.75" width="5.5" height="5.5" rx="1" /><rect x="1.75" y="8.75" width="5.5" height="5.5" rx="1" /><rect x="8.75" y="8.75" width="5.5" height="5.5" rx="1" /></svg>
+)
+const IconTrend = () => (
+  <svg viewBox="0 0 16 16" width="15" height="15" {...ico}><path d="M1.5 10.5 5.5 6.5 8.5 9 14 3" /><path d="M10.5 3H14v3.5" /></svg>
+)
+const IconTable = () => (
+  <svg viewBox="0 0 16 16" width="15" height="15" {...ico}><rect x="1.5" y="2.5" width="13" height="11" rx="1.5" /><path d="M1.5 6.5h13M6 6.5v7" /></svg>
+)
+const IconRadar = () => (
+  <svg viewBox="0 0 16 16" width="15" height="15" {...ico}><path d="M8 1.5 14 6l-2.3 7H4.3L2 6z" /><circle cx="8" cy="8" r="1.4" fill="currentColor" stroke="none" /></svg>
+)
+const IconUpload = () => (
+  <svg viewBox="0 0 16 16" width="15" height="15" {...ico}><path d="M8 10.5V2.5M5 5l3-3 3 3" /><path d="M2.5 10.5v2a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-2" /></svg>
+)
+
 const TABS = [
-  { id: 'resumen', label: '📊 Dashboard' },
-  { id: 'detalle', label: '📈 Detalle por KPI' },
-  { id: 'matriz', label: '📋 Matriz de Indicadores' },
-  { id: 'cinco', label: '🎯 Análisis 5S' },
+  { id: 'resumen', label: 'Dashboard', icon: <IconGrid /> },
+  { id: 'detalle', label: 'Detalle por KPI', icon: <IconTrend /> },
+  { id: 'matriz', label: 'Matriz de indicadores', icon: <IconTable /> },
+  { id: 'cinco', label: 'Análisis 5S', icon: <IconRadar /> },
 ]
 
 export default function App() {
@@ -82,35 +99,55 @@ export default function App() {
 
   if (!dashboard) return null
 
+  const reportPeriod = (() => {
+    for (const d of dashboard.definitions) {
+      const ms = (dashboard.data[d.id] || []).filter((m) => m.result !== null)
+      if (ms.length) return `${ms[ms.length - 1].period} ${dashboard.meta.date.slice(0, 4)}`
+    }
+    return dashboard.meta.date
+  })()
+
   return (
     <div className="shell" id="shell">
-      <header>
-        <div className="topbar">
-          <div className="brand">
-            <img src="./logo.jpeg" alt="Palestra Couture" className="brand-logo" />
-            <div>
-              <div className="eyebrow">Palestra Couture</div>
-              <h1>KPI Dashboard</h1>
-              <p>Indicadores clave de gestión</p>
+      <header className="topbar">
+        <div className="brand">
+          <img src="./logo.jpeg" alt="Palestra Couture" className="brand-logo" />
+          <div className="brand-text">
+            <div className="brand-name">Palestra Couture</div>
+            <div className="brand-meta">
+              <span>Panel de indicadores de gestión</span>
+              {reportPeriod && (
+                <>
+                  <span className="brand-dot" aria-hidden="true">·</span>
+                  <span className="report-chip">{reportPeriod}</span>
+                </>
+              )}
             </div>
           </div>
-          <div className="toolbar">
-            <label className="action-btn">
-              📂 Cargar Excel
-              <input type="file" accept=".xlsx,.xls" onChange={handleFile} hidden />
-            </label>
-            <PdfExporter prepare={() => setTab('resumen')} />
-          </div>
+        </div>
+        <div className="toolbar">
+          <label className="action-btn primary">
+            <IconUpload />
+            Cargar Excel
+            <input type="file" accept=".xlsx,.xls" onChange={handleFile} hidden />
+          </label>
+          <PdfExporter prepare={() => setTab('resumen')} />
         </div>
       </header>
 
-      <div className="tabs">
+      <nav className="tabs" aria-label="Secciones">
         {TABS.map((t) => (
-          <button key={t.id} className={`tab${tab === t.id ? ' active' : ''}`} onClick={() => setTab(t.id)}>
+          <button
+            key={t.id}
+            className={`tab${tab === t.id ? ' active' : ''}`}
+            aria-current={tab === t.id ? 'page' : undefined}
+            onClick={() => setTab(t.id)}
+          >
+            {t.icon}
             {t.label}
           </button>
         ))}
-      </div>
+      </nav>
 
       {tab === 'resumen' && <TabResumen />}
       {tab === 'detalle' && <TabDetalle />}

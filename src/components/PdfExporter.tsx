@@ -75,7 +75,11 @@ export function PdfExporter({ prepare }: Props) {
 
   return (
     <button className="action-btn" onClick={handleExport} disabled={busy}>
-      {busy ? '…' : t('export.pdf')}
+      <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M8 2v8M5 7l3 3 3-3" />
+        <path d="M2.5 10.5v2a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-2" />
+      </svg>
+      {busy ? 'Generando…' : t('export.pdf')}
     </button>
   )
 }
